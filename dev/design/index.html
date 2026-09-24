@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="IRC server with an AX.25 packet-radio gateway">
+        <meta name="description" content="IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS)">
       
       
       
-        <link rel="canonical" href="https://mashu.github.io/ax25ircd/dev/design/">
+        <link rel="canonical" href="https://mashu.github.io/rfircd/dev/design/">
       
       
         <link rel="prev" href="../station/">
@@ -22,12 +22,12 @@
         
       
       
-      <link rel="icon" href="../assets/ax25ircd.svg">
+      <link rel="icon" href="../assets/rfircd.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Design - ax25ircd</title>
+        <title>Design - rfircd</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ax25irc-design" class="md-skip">
+        <a href="#rfircd-design" class="md-skip">
           Skip to content
         </a>
       
@@ -92,9 +92,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="ax25ircd" class="md-header__button md-logo" aria-label="ax25ircd" data-md-component="logo">
+    <a href=".." title="rfircd" class="md-header__button md-logo" aria-label="rfircd" data-md-component="logo">
       
-  <img src="../assets/ax25ircd.svg" alt="logo">
+  <img src="../assets/rfircd.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -105,7 +105,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            ax25ircd
+            rfircd
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -167,13 +167,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/mashu/ax25ircd" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/mashu/rfircd" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    mashu/ax25ircd
+    mashu/rfircd
   </div>
 </a>
       </div>
@@ -203,22 +203,22 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="ax25ircd" class="md-nav__button md-logo" aria-label="ax25ircd" data-md-component="logo">
+    <a href=".." title="rfircd" class="md-nav__button md-logo" aria-label="rfircd" data-md-component="logo">
       
-  <img src="../assets/ax25ircd.svg" alt="logo">
+  <img src="../assets/rfircd.svg" alt="logo">
 
     </a>
-    ax25ircd
+    rfircd
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/mashu/ax25ircd" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/mashu/rfircd" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    mashu/ax25ircd
+    mashu/rfircd
   </div>
 </a>
     </div>
@@ -1333,16 +1333,17 @@
   
 
 
-<h1 id="ax25irc-design">AX25IRC design<a class="headerlink" href="#ax25irc-design" title="Permanent link">&para;</a></h1>
+<h1 id="rfircd-design">rfircd design<a class="headerlink" href="#rfircd-design" title="Permanent link">&para;</a></h1>
 <h2 id="1-what-this-is">1. What this is<a class="headerlink" href="#1-what-this-is" title="Permanent link">&para;</a></h2>
-<p>An IRC server that is simultaneously an AX.25 packet radio gateway. Two
+<p>An IRC server that is simultaneously an RF packet gateway over KISS. Two
 populations share the same channels, and a third can write into them:</p>
 <ul>
 <li><strong>IP users</strong> with an ordinary IRC client (irssi) over TCP or TLS.</li>
 <li><strong>RF stations</strong> with a radio and a TNC, speaking a compact protocol (AIRC/1)
   carried in AX.25 UI frames.</li>
 <li><strong>APRS radios</strong> that message the gateway callsign. No AIRC client; a line
-  of the form <code>#rf hello</code> is injected into that channel.</li>
+  of the form <code>#rf hello</code> is injected into that channel, and channel/DM
+  replies can be sent back as addressed APRS when needed.</li>
 </ul>
 <p>A message sent in a bridged channel reaches both. Nothing else does: the design
 is mostly about deciding what is <em>not</em> worth putting on the air.</p>
@@ -1580,13 +1581,13 @@ RF-sourced text on a terminal must filter it first
 (<code>policy::strip_terminal_controls</code>), or a station within earshot can set the
 window title, clear the screen, or on a terminal that answers back, put its
 own text on the operator's shell prompt. The gateway sanitises before text
-reaches IRC; <code>ax25irc-station</code> filters everything it prints, including the
+reaches IRC; <code>rfirc-station</code> filters everything it prints, including the
 lines it composed itself, because filtering at the one exit is what keeps it
 true of paths added later.</p>
 <p>Commands, flags, and what survives a restart: <a href="../usage/">usage.md</a>.</p>
 <p>A typical club setup: internet users join <code>#rf</code> to follow the QSO; only the
 control operator and nicks they have granted can key the transmitter.
-<code>ax25irc-station</code> is not an IRC client — it speaks AIRC over KISS.</p>
+<code>rfirc-station</code> is not an IRC client — it speaks AIRC over KISS.</p>
 <p>If you need people on the internet to speak or control the transmitter,
 configure <code>[listen.tls]</code> (implicit TLS, typically port 6697). A plaintext
 socket from off this machine is listen-only: they can watch <code>#rf</code>, they
@@ -1663,16 +1664,22 @@ can be smuggled onto the air by waiting.</p>
 <p><code>RADIO MAIL</code> shows the control operator what is waiting for whom.</p>
 <h2 id="62-aprs-interop">6.2 APRS interop<a class="headerlink" href="#62-aprs-interop" title="Permanent link">&para;</a></h2>
 <p>A stock APRS radio (Kenwood, Yaesu, APRSdroid) does not speak AIRC. It can
-still put a line into a bridged channel by sending an APRS <strong>message</strong> whose
-addressee is the gateway callsign:</p>
+still join the public RF QSO by sending an APRS <strong>message</strong> whose addressee
+is the gateway callsign:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>:SK0MT-1  :#rf hello from the trail{01
 </code></pre></div>
 <p>The AX.25 destination is a TOCALL (<code>APRS</code>, <code>APK004</code>, …); the addressee lives
 in the information field. The gateway ACKs (<code>ack01</code>) so the radio stops
 retrying — silence would cost more airtime than the ACK — and injects the
 text into <code>#rf</code>. AIRC stations already in that channel get a translated
-broadcast; they did not decode the APRS frame. Messages to anyone else are
-ignored.</p>
+broadcast; they did not decode the APRS frame. A line <code>nick text</code> when that
+nick is online is delivered as an IRC query instead.</p>
+<p>Outbound: IRC channel chat and private messages reach APRS peers as addressed
+APRS (<code>nick: text{id}</code>), with msgid + ACK/retry. Under the default
+<code>radio.rf_mode = "airc"</code>, AIRC broadcast stays one frame per line and only
+APRS-dialect peers are fanned out. With <code>rf_mode = "aprs"</code>, the gateway
+encodes outbound chat as APRS only (one frame per RF peer in the channel; no
+AIRC CQ). JOIN/PART/numerics/MODE never go out as APRS.</p>
 <p>Position reports (<code>! = / @</code>, compressed, Mic-E) and status beacons (<code>&gt;</code>)
 heard on frequency are shown on IRC as a channel NOTICE. That costs no
 airtime and is never retransmitted: every station already heard the beacon.
@@ -1777,7 +1784,7 @@ with <code>radio.aprs = false</code>.</p>
 <a href="../quickstart/">quickstart.md</a>, <a href="../qmx/">qmx.md</a>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[direwolf]  ADEVICE plughw:1,0 / MODEM 1200 / KISSPORT 8001
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>     │  KISS over TCP :8001
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>[ax25ircd]  radio.tnc.kind = "tcp", port 8001
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>[rfircd]  radio.tnc.kind = "tcp", port 8001
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>     │  TCP :6667 on localhost (operator console)
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>     │  TLS :6697 for internet clients
 </code></pre></div>
@@ -1797,12 +1804,12 @@ to every user at registration.</p>
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>RADIO REVOKE &lt;nick&gt;     take it away
 </code></pre></div>
 <h2 id="81-development-without-a-radio">8.1 Development without a radio<a class="headerlink" href="#81-development-without-a-radio" title="Permanent link">&para;</a></h2>
-<p><code>ax25irc-kisshub</code> is a virtual channel: every TCP client that connects is a
+<p><code>rfirc-kisshub</code> is a virtual channel: every TCP client that connects is a
 station on the same frequency, and a KISS frame from one is delivered to all
 the others. With it, the whole system runs on a laptop:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>ax25irc-kisshub<span class="w"> </span>--bind<span class="w"> </span><span class="m">127</span>.0.0.1:8001<span class="w"> </span><span class="p">&amp;</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ax25ircd<span class="w"> </span>-c<span class="w"> </span>ax25ircd.toml<span class="w"> </span><span class="p">&amp;</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ax25irc-station<span class="w"> </span>--call<span class="w"> </span>SM0ABC-7<span class="w"> </span>--gateway<span class="w"> </span>SK0MT-1<span class="w"> </span>--channel<span class="w"> </span><span class="s1">'#rf'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>rfirc-kisshub<span class="w"> </span>--bind<span class="w"> </span><span class="m">127</span>.0.0.1:8001<span class="w"> </span><span class="p">&amp;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>rfircd<span class="w"> </span>-c<span class="w"> </span>rfircd.toml<span class="w"> </span><span class="p">&amp;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>rfirc-station<span class="w"> </span>--call<span class="w"> </span>SM0ABC-7<span class="w"> </span>--gateway<span class="w"> </span>SK0MT-1<span class="w"> </span>--channel<span class="w"> </span><span class="s1">'#rf'</span>
 </code></pre></div>
 <p>The hub prints every frame in <code>axlisten</code> monitor format, which is how the
 sequence-space bug described in <a href="../protocol/">protocol.md</a> §3.1 was found: the gateway
@@ -1940,7 +1947,7 @@ callsign is ACKed and injected while a beacon on the same frequency is not.</p>
       
       
     
-    <a href="https://github.com/mashu/ax25ircd" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+    <a href="https://github.com/mashu/rfircd" target="_blank" rel="noopener" title="github.com" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
     </a>
   

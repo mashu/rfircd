@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="IRC server with an AX.25 packet-radio gateway">
+        <meta name="description" content="IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS)">
       
       
       
-        <link rel="canonical" href="https://mashu.github.io/ax25ircd/dev/usage/">
+        <link rel="canonical" href="https://mashu.github.io/rfircd/dev/usage/">
       
       
         <link rel="prev" href="../qmx/">
@@ -22,12 +22,12 @@
         
       
       
-      <link rel="icon" href="../assets/ax25ircd.svg">
+      <link rel="icon" href="../assets/rfircd.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>IRC and privileges - ax25ircd</title>
+        <title>IRC and privileges - rfircd</title>
       
     
     
@@ -92,9 +92,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="ax25ircd" class="md-header__button md-logo" aria-label="ax25ircd" data-md-component="logo">
+    <a href=".." title="rfircd" class="md-header__button md-logo" aria-label="rfircd" data-md-component="logo">
       
-  <img src="../assets/ax25ircd.svg" alt="logo">
+  <img src="../assets/rfircd.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -105,7 +105,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            ax25ircd
+            rfircd
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -167,13 +167,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/mashu/ax25ircd" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/mashu/rfircd" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    mashu/ax25ircd
+    mashu/rfircd
   </div>
 </a>
       </div>
@@ -203,22 +203,22 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="ax25ircd" class="md-nav__button md-logo" aria-label="ax25ircd" data-md-component="logo">
+    <a href=".." title="rfircd" class="md-nav__button md-logo" aria-label="rfircd" data-md-component="logo">
       
-  <img src="../assets/ax25ircd.svg" alt="logo">
+  <img src="../assets/rfircd.svg" alt="logo">
 
     </a>
-    ax25ircd
+    rfircd
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/mashu/ax25ircd" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/mashu/rfircd" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    mashu/ax25ircd
+    mashu/rfircd
   </div>
 </a>
     </div>
@@ -1308,18 +1308,18 @@ nick.</p>
 reserved for stations heard on the air. Use a normal nick (<code>alice</code>) and claim
 the callsign after connect.</p>
 <p>A dedicated config (nothing else in it) lives next to the gateway config:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a># ~/.config/ax25ircd/irssi.conf  —  irssi --config=this-file
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a># ~/.config/rfircd/irssi.conf  —  irssi --config=this-file
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>servers = (
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  {
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    address = "127.0.0.1";
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    chatnet = "ax25irc";
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    chatnet = "rfirc";
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    port = "6667";
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    use_tls = "no";
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    autoconnect = "yes";
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  }
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>);
 <a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>chatnets = {
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>  ax25irc = { type = "IRC"; nick = "alice"; };
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>  rfirc = { type = "IRC"; nick = "alice"; };
 <a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>};
 <a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>settings = {
 <a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>  core = {
@@ -1329,13 +1329,13 @@ the callsign after connect.</p>
 <a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>  };
 <a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>};
 <a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>channels = (
-<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>  { name = "#rf"; chatnet = "ax25irc"; autojoin = "Yes"; }
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>  { name = "#rf"; chatnet = "rfirc"; autojoin = "Yes"; }
 <a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>);
 <a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>ignores = ( );
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdir -p ~/.config/ax25ircd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdir -p ~/.config/rfircd
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a># save the file above, then:
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>irssi --config=~/.config/ax25ircd/irssi.conf
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>irssi --config=~/.config/rfircd/irssi.conf
 </code></pre></div>
 <p>Once connected:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/quote CALLSIGN SM0XYZ
@@ -1410,11 +1410,11 @@ A new event type does not go on the air until someone adds it to the list.</p>
 <h2 id="watch-a-simulated-station">Watch a simulated station<a class="headerlink" href="#watch-a-simulated-station" title="Permanent link">&para;</a></h2>
 <p>No radio and no licence: a virtual frequency plus the station client. This is
 the way to see RF nicks and messages in irssi.</p>
-<p>In <code>ax25ircd.toml</code>, <code>[radio] enabled = true</code> and <code>[radio.tnc]</code> pointing at
+<p>In <code>rfircd.toml</code>, <code>[radio] enabled = true</code> and <code>[radio.tnc]</code> pointing at
 kisshub (<code>host = "127.0.0.1"</code>, <code>port = 8001</code>). Then:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>./target/release/ax25irc-kisshub<span class="w"> </span>--bind<span class="w"> </span><span class="m">127</span>.0.0.1:8001
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>./target/release/ax25ircd<span class="w"> </span>-c<span class="w"> </span>ax25ircd.toml
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>./target/release/ax25irc-station<span class="w"> </span>--call<span class="w"> </span>SM0ABC-7<span class="w"> </span>--gateway<span class="w"> </span>SK0MT-1<span class="w"> </span>--channel<span class="w"> </span><span class="s1">'#rf'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>./target/release/rfirc-kisshub<span class="w"> </span>--bind<span class="w"> </span><span class="m">127</span>.0.0.1:8001
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>./target/release/rfircd<span class="w"> </span>-c<span class="w"> </span>rfircd.toml
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>./target/release/rfirc-station<span class="w"> </span>--call<span class="w"> </span>SM0ABC-7<span class="w"> </span>--gateway<span class="w"> </span>SK0MT-1<span class="w"> </span>--channel<span class="w"> </span><span class="s1">'#rf'</span>
 </code></pre></div>
 <p>In irssi (localhost, as above): <code>/join #rf</code>. The station appears as
 <code>SM0ABC|7</code>. Type in the station client; the line shows up in <code>#rf</code>. Type in
@@ -1426,7 +1426,7 @@ nick (or you <code>OPER</code>). The hub prints frames in <code>axlisten</code> 
 <ul>
 <li><strong>Internet user</strong> — ordinary nick (<code>alice</code>). Registers, may be granted RF-TX,
   claims a callsign with <code>CALLSIGN</code>. The nick itself is not a callsign.</li>
-<li><strong>RF station</strong> — <code>ax25irc-station</code> or any AIRC client. Already on the air.
+<li><strong>RF station</strong> — <code>rfirc-station</code> or any AIRC client. Already on the air.
   Appears as a reserved nick derived from the AX.25 source (<code>SM0ABC-7</code> →
   <code>SM0ABC|7</code>). No <code>REGISTER</code>, no <code>RADIO GRANT</code>. Restrict with
   <code>policy.allow_callsigns</code> / <code>deny_callsigns</code>.</li>
@@ -1453,12 +1453,12 @@ without RF-TX stays on IRC until a station is in the channel.</p>
 <p>A control operator (<code>OPER</code>) has RF-TX for that session without a grant. They
 still need <code>CALLSIGN</code> before their text is radiated. On a public
 <code>listen.bind</code>, <code>[[opers]]</code> passwords must be Argon2id hashes from
-<code>ax25ircd --hash-password</code>; plaintext is accepted only on loopback.</p>
+<code>rfircd --hash-password</code>; plaintext is accepted only on loopback.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>/oper root the-oper-password
 </code></pre></div>
 <h2 id="letting-an-rf-station-on-the-air">Letting an RF station on the air<a class="headerlink" href="#letting-an-rf-station-on-the-air" title="Permanent link">&para;</a></h2>
 <p>The station transmits with its own radio. The gateway does not grant it RF-TX.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ax25irc-station<span class="w"> </span>--call<span class="w"> </span>SM0ABC-7<span class="w"> </span>--gateway<span class="w"> </span>SK0MT-1<span class="w"> </span>--channel<span class="w"> </span><span class="s1">'#rf'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>rfirc-station<span class="w"> </span>--call<span class="w"> </span>SM0ABC-7<span class="w"> </span>--gateway<span class="w"> </span>SK0MT-1<span class="w"> </span>--channel<span class="w"> </span><span class="s1">'#rf'</span>
 </code></pre></div>
 <p>If <code>allow_callsigns</code> is empty, any plausible amateur callsign may use the RF
 side. A non-empty list is a closed system. <code>deny_callsigns</code> bans a station
@@ -1471,7 +1471,12 @@ config) from any APRS HT or app:</p>
 <p>The gateway ACKs so the radio's retry cycle stops, the station appears in
 the channel as <code>SM0ABC|7</code>, and the line shows up on IRC. AIRC stations
 already in <code>#rf</code> hear a translated copy; they did not decode the APRS
-frame. Messages to anyone else are ignored.</p>
+frame. A line <code>alice hello</code> when <code>alice</code> is online is a private query to
+that nick instead.</p>
+<p>Replies: <code>/msg SM0ABC|7 …</code> or channel chat in <code>#rf</code> while that station is
+present goes back as an addressed APRS message (<code>nick: text</code>). Set
+<code>radio.rf_mode = "aprs"</code> if you want <em>all</em> outbound RF chat as APRS (no AIRC
+CQ). IRC JOIN/PART/MODE/numerics are never put on the air as APRS.</p>
 <p>Position reports and status beacons heard on frequency are shown in the
 channel as a NOTICE (<code>-SM0ABC|7- 59°30.00N 018°03.00E - QTH</code>). They are
 never put back on the air. They do not join the channel.</p>
@@ -1640,7 +1645,7 @@ on restart. See <code>mailbox_*</code> in the config.</p>
 <a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>   is next heard (1 waiting, dropped after 24h).
 </code></pre></div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Every option is documented inline in <code>ax25ircd.example.toml</code>. Unknown keys are
+<p>Every option is documented inline in <code>rfircd.example.toml</code>. Unknown keys are
 refused. The validator also refuses an identification interval over ten
 minutes, a gateway "callsign" that is not a plausible callsign, more than two
 digipeater hops, and <code>radio.enabled</code> with no bridged channel.</p>
@@ -1742,7 +1747,7 @@ digipeater hops, and <code>radio.enabled</code> with no bridged channel.</p>
       
       
     
-    <a href="https://github.com/mashu/ax25ircd" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+    <a href="https://github.com/mashu/rfircd" target="_blank" rel="noopener" title="github.com" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
     </a>
   

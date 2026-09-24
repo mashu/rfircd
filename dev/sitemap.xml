@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/airtime/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/airtime/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/contributing/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/contributing/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/design/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/design/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/install/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/install/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/packaging/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/packaging/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/protocol/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/protocol/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/qmx/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/qmx/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/quickstart/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/quickstart/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/regulatory/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/regulatory/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/station/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/station/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
     <url>
-         <loc>https://mashu.github.io/ax25ircd/dev/usage/</loc>
-         <lastmod>2026-09-11</lastmod>
+         <loc>https://mashu.github.io/rfircd/dev/usage/</loc>
+         <lastmod>2026-09-24</lastmod>
     </url>
 </urlset>
