@@ -1,6 +1,6 @@
 [package]
 name = "rfircd"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2021"
 rust-version = "1.75"
 description = "IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS) for amateur radio"
