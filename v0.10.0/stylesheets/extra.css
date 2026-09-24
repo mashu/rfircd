@@ -1,0 +1,123 @@
+@import url("https://fonts.bunny.net/css?family=fraunces:600|ibm-plex-sans:400,600|ibm-plex-mono:400,500");
+
+:root {
+  --md-primary-fg-color: #1a2418;
+  --md-primary-fg-color--light: #2e4630;
+  --md-primary-fg-color--dark: #0c140e;
+  --md-accent-fg-color: #e8c36a;
+  --md-accent-fg-color--transparent: color-mix(in srgb, #e8c36a 14%, transparent);
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #132016;
+  --md-default-bg-color--light: #1c2a1e;
+  --md-default-fg-color: #efe4c6;
+  --md-default-fg-color--light: #c5d0c0;
+  --md-code-bg-color: #0c140e;
+  --md-code-fg-color: #8dff70;
+  --md-footer-bg-color: #0c140e;
+  /* Material derives link colour from primary (near-black). Override it. */
+  --md-typeset-a-color: #e8c36a;
+}
+
+.md-typeset {
+  font-family: "IBM Plex Sans", "Liberation Sans", sans-serif;
+}
+
+.md-typeset code,
+.md-typeset pre,
+.md-header,
+.md-nav {
+  font-family: "IBM Plex Mono", ui-monospace, "Liberation Mono", monospace;
+}
+
+.md-header {
+  background: #1a2418;
+  border-bottom: 1px solid color-mix(in srgb, #e8c36a 40%, transparent);
+  font-family: "IBM Plex Mono", ui-monospace, "Liberation Mono", monospace;
+}
+
+.md-tabs {
+  background: #1a2418;
+}
+
+.md-typeset h1,
+.md-typeset h2 {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.md-typeset .admonition.warning,
+.md-typeset details.warning {
+  border-color: #a33c2a;
+}
+
+.md-version__current {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+/* Body, nav, TOC, footer, header: links must stay readable on forest. */
+.md-typeset a:not(.md-button),
+.md-nav__link,
+.md-footer a,
+.md-footer-meta a,
+.md-tabs__link,
+.md-source,
+.md-header__button:not(.md-logo),
+.md-search-result__link,
+.md-typeset .headerlink,
+.md-typeset .admonition a,
+.md-typeset details a {
+  color: #e8c36a;
+}
+
+.md-typeset a:not(.md-button):hover,
+.md-typeset a:not(.md-button):focus,
+.md-nav__link:hover,
+.md-nav__link:focus,
+.md-footer a:hover,
+.md-tabs__link:hover,
+.md-source:hover,
+.md-typeset .headerlink:hover,
+.md-typeset .admonition a:hover {
+  color: #8dff70;
+}
+
+.md-nav__link--active,
+.md-nav__item .md-nav__link--active,
+.md-tabs__link--active {
+  color: #8dff70;
+}
+
+.md-typeset a:not(.md-button):focus-visible,
+.md-nav__link:focus-visible {
+  outline: 2px solid #8dff70;
+  outline-offset: 2px;
+}
+
+.md-typeset .md-button {
+  color: #efe4c6;
+  background: transparent;
+  border: 1px solid #e8c36a;
+}
+
+.md-typeset .md-button:hover,
+.md-typeset .md-button:focus {
+  color: #132016;
+  background: #e8c36a;
+}
+
+.md-typeset .md-button--primary {
+  color: #132016;
+  background: #e8c36a;
+  border-color: #e8c36a;
+}
+
+.md-typeset .md-button--primary:hover,
+.md-typeset .md-button--primary:focus {
+  color: #132016;
+  background: #8dff70;
+  border-color: #8dff70;
+}
