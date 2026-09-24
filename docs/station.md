@@ -1,13 +1,13 @@
 # Station client and virtual channel
 
-## ax25irc-station
+## rfirc-station
 
 Line-oriented, so it works over ssh and on a headless Pi.
 
 ```sh
-ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf' \
+rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf' \
                 --tnc tcp://127.0.0.1:8001
-ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 \
+rfirc-station --call SM0ABC-7 --gateway SK0MT-1 \
                 --tnc serial:/dev/ttyUSB0@9600 --path SK0MT-2
 ```
 
@@ -28,7 +28,7 @@ the same QRP radio at the same baud rate, and the finals do not know the
 difference.
 
 ```sh
-ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 \
+rfirc-station --call SM0ABC-7 --gateway SK0MT-1 \
                 --baud 300 --txdelay 400 --txtail 300 \
                 --duty 25 --max-continuous 30 --cooldown 60
 ```
@@ -41,16 +41,16 @@ to price each frame, so the modem and the model cannot disagree.
 See [Airtime](airtime.md) for what the limits mean and why they are shaped the
 way they are.
 
-## ax25irc-kisshub
+## rfirc-kisshub
 
 A virtual channel: every TCP client that connects is a station on the same
 frequency, and it prints every frame in `axlisten` monitor format. No radio, no
 licence.
 
 ```sh
-ax25irc-kisshub --bind 127.0.0.1:8001 &
-ax25ircd -c ax25ircd.toml &                 # radio.tnc.port = 8001
-ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+rfirc-kisshub --bind 127.0.0.1:8001 &
+rfircd -c rfircd.toml &                 # radio.tnc.port = 8001
+rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
 ```
 
 Then connect irssi to **only** this server (`irssi -! -c 127.0.0.1 -p 6667 -n alice`),

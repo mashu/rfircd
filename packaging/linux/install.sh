@@ -1,8 +1,8 @@
 #!/bin/sh
-# Install ax25ircd binaries and data files. Invoked by the .run installer
+# Install rfircd binaries and data files. Invoked by the .run installer
 # and usable from an extracted tarball:
-#   tar xf ax25ircd-x86_64-linux.tar.gz
-#   ./ax25ircd-*/install.sh
+#   tar xf rfircd-x86_64-linux.tar.gz
+#   ./rfircd-*/install.sh
 #
 #   ./install.sh                 # $HOME/.local
 #   ./install.sh --prefix DIR
@@ -60,30 +60,30 @@ if [ "$SYSTEM" -eq 1 ] && [ "$(id -u)" -ne 0 ]; then
 fi
 
 BINDIR="$PREFIX/bin"
-DATADIR="$PREFIX/share/ax25ircd"
-DOCDIR="$PREFIX/share/doc/ax25ircd"
+DATADIR="$PREFIX/share/rfircd"
+DOCDIR="$PREFIX/share/doc/rfircd"
 UNITDIR=""
 if [ "$SYSTEM" -eq 1 ]; then
     UNITDIR=/etc/systemd/system
-    CONFDIR=/etc/ax25ircd
+    CONFDIR=/etc/rfircd
 else
     UNITDIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
-    CONFDIR="${XDG_CONFIG_HOME:-$HOME/.config}/ax25ircd"
+    CONFDIR="${XDG_CONFIG_HOME:-$HOME/.config}/rfircd"
 fi
 
 mkdir -p "$BINDIR" "$DATADIR" "$DOCDIR" "$CONFDIR"
 
-for b in ax25ircd ax25irc-station ax25irc-kisshub; do
+for b in rfircd rfirc-station rfirc-kisshub; do
     install -m 0755 "$HERE/bin/$b" "$BINDIR/$b"
 done
 
-install -m 0644 "$HERE/share/ax25ircd.example.toml" "$DATADIR/ax25ircd.example.toml"
-install -m 0644 "$HERE/share/ax25ircd.service" "$DATADIR/ax25ircd.service"
+install -m 0644 "$HERE/share/rfircd.example.toml" "$DATADIR/rfircd.example.toml"
+install -m 0644 "$HERE/share/rfircd.service" "$DATADIR/rfircd.service"
 if [ -d "$HERE/share/doc" ]; then
     cp -R "$HERE/share/doc/." "$DOCDIR/"
 fi
 
-CONFFILE="$CONFDIR/ax25ircd.toml"
+CONFFILE="$CONFDIR/rfircd.toml"
 if [ -f "$CONFFILE" ]; then
     echo "kept existing config: $CONFFILE"
 elif [ -t 0 ] && [ -t 1 ]; then
@@ -97,7 +97,7 @@ elif [ -t 0 ] && [ -t 1 ]; then
     case "$reply" in
         [Nn]*) ;;
         *)
-            if "$BINDIR/ax25ircd" --init -c "$CONFFILE"; then
+            if "$BINDIR/rfircd" --init -c "$CONFFILE"; then
                 CONFIGURED=1
             else
                 echo "setup did not finish; falling back to the example config" >&2
@@ -107,46 +107,46 @@ elif [ -t 0 ] && [ -t 1 ]; then
 fi
 
 if [ ! -f "$CONFFILE" ]; then
-    install -m 0644 "$HERE/share/ax25ircd.example.toml" "$CONFFILE"
+    install -m 0644 "$HERE/share/rfircd.example.toml" "$CONFFILE"
     echo "wrote starter config: $CONFFILE"
     echo "edit radio.callsign (your callsign) before enabling radio.enabled"
-    echo "or run: $BINDIR/ax25ircd --init -c $CONFFILE   (after moving it aside)"
+    echo "or run: $BINDIR/rfircd --init -c $CONFFILE   (after moving it aside)"
 fi
 
 if [ "$SYSTEM" -eq 1 ]; then
-    install -m 0644 "$HERE/share/ax25ircd.service" "$UNITDIR/ax25ircd.service"
-    echo "systemd unit: $UNITDIR/ax25ircd.service"
-    echo "create a system user, put the config at /etc/ax25ircd.toml (or edit"
-    echo "ExecStart), then: systemctl daemon-reload && systemctl enable --now ax25ircd"
+    install -m 0644 "$HERE/share/rfircd.service" "$UNITDIR/rfircd.service"
+    echo "systemd unit: $UNITDIR/rfircd.service"
+    echo "create a system user, put the config at /etc/rfircd.toml (or edit"
+    echo "ExecStart), then: systemctl daemon-reload && systemctl enable --now rfircd"
 else
     mkdir -p "$UNITDIR"
     # User unit: run from the user's config path, not /etc.
-    sed -e "s|/usr/local/bin/ax25ircd|$BINDIR/ax25ircd|g" \
-        -e "s|/etc/ax25ircd.toml|$CONFFILE|g" \
+    sed -e "s|/usr/local/bin/rfircd|$BINDIR/rfircd|g" \
+        -e "s|/etc/rfircd.toml|$CONFFILE|g" \
         -e '/^User=/d' \
         -e '/^Group=/d' \
         -e 's/^ProtectHome=.*/ProtectHome=no/' \
-        "$HERE/share/ax25ircd.service" > "$UNITDIR/ax25ircd.service"
-    echo "user systemd unit: $UNITDIR/ax25ircd.service"
+        "$HERE/share/rfircd.service" > "$UNITDIR/rfircd.service"
+    echo "user systemd unit: $UNITDIR/rfircd.service"
     echo "  systemctl --user daemon-reload"
-    echo "  systemctl --user enable --now ax25ircd"
+    echo "  systemctl --user enable --now rfircd"
 fi
 
 case ":$PATH:" in
     *":$BINDIR:"*) ;;
     *)
         echo
-        echo "note: $BINDIR is not on PATH. Add it, or run $BINDIR/ax25ircd"
+        echo "note: $BINDIR is not on PATH. Add it, or run $BINDIR/rfircd"
         ;;
 esac
 
 echo
 echo "installed:"
-echo "  $BINDIR/ax25ircd"
-echo "  $BINDIR/ax25irc-station"
-echo "  $BINDIR/ax25irc-kisshub"
+echo "  $BINDIR/rfircd"
+echo "  $BINDIR/rfirc-station"
+echo "  $BINDIR/rfirc-kisshub"
 echo
 if [ "${CONFIGURED:-0}" -eq 0 ]; then
-    echo "next:  ax25ircd --check -c $CONFFILE"
+    echo "next:  rfircd --check -c $CONFFILE"
 fi
-echo "guide: https://mashu.github.io/ax25ircd/"
+echo "guide: https://mashu.github.io/rfircd/"

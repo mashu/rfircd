@@ -32,7 +32,7 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ServerConfig {
-    /// Server name announced to clients, e.g. `ax25irc.sk0mt.example`.
+    /// Server name announced to clients, e.g. `rfirc.sk0mt.example`.
     pub name: String,
     #[serde(default = "default_network")]
     pub network: String,
@@ -188,6 +188,15 @@ pub struct RadioConfig {
     /// configured `+r` channel.
     #[serde(default)]
     pub aprs_channel: String,
+    /// How the gateway encodes traffic it transmits. Inbound always accepts
+    /// both APRS and AIRC; only outbound encoding follows this setting.
+    ///
+    /// * `airc` (default) — one AIRC broadcast per channel line; APRS-only
+    ///   peers still get addressed APRS copies so stock HTs hear the QSO.
+    /// * `aprs` — channel and direct chat go out as APRS messages only
+    ///   (one addressed frame per RF peer in the channel). No AIRC CQ.
+    #[serde(default)]
+    pub rf_mode: RfMode,
     /// External transmit interlock: a command that decides whether it is safe
     /// to key up at all. See [`InterlockConfig`].
     #[serde(default)]
@@ -201,7 +210,7 @@ pub struct RadioConfig {
 
 /// A command that says whether it is safe to transmit.
 ///
-/// ax25ircd cannot see the radio — it speaks KISS to a modem, and KISS carries
+/// rfircd cannot see the radio — it speaks KISS to a modem, and KISS carries
 /// frames, not SWR readings — so the check is the operator's to supply. While
 /// it fails, nothing is transmitted, station identification included.
 ///
@@ -319,6 +328,27 @@ impl DutyConfig {
 impl Default for RadioConfig {
     fn default() -> Self {
         toml::from_str("").expect("RadioConfig defaults are self-consistent")
+    }
+}
+
+/// On-air encoding for traffic this gateway transmits.
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum RfMode {
+    /// Compact AIRC/1 (default). Mixed nets still fan out APRS to APRS peers.
+    #[default]
+    Airc,
+    /// Stock APRS messages only. No AIRC chat or CQ.
+    Aprs,
+}
+
+impl RfMode {
+    pub fn is_airc(self) -> bool {
+        matches!(self, RfMode::Airc)
+    }
+
+    pub fn is_aprs(self) -> bool {
+        matches!(self, RfMode::Aprs)
     }
 }
 
@@ -479,7 +509,7 @@ pub struct ChannelConfig {
 #[serde(deny_unknown_fields)]
 pub struct OperConfig {
     pub name: String,
-    /// Plain password or Argon2id PHC string (`ax25ircd --hash-password`).
+    /// Plain password or Argon2id PHC string (`rfircd --hash-password`).
     /// Plaintext is only accepted when `listen.bind` is loopback-only.
     pub password: String,
 }
@@ -865,7 +895,7 @@ fn check_oper_passwords(opers: &[OperConfig], bind: &[String]) -> anyhow::Result
     }
     anyhow::bail!(
         "{plaintext} [[opers]] password(s) are plaintext and listen.bind is not loopback-only. \
-         Hash them (`ax25ircd --hash-password`) or bind only to 127.0.0.1 / ::1. \
+         Hash them (`rfircd --hash-password`) or bind only to 127.0.0.1 / ::1. \
          OPER with a password in the clear on a public address is control of the transmitter."
     );
 }
@@ -941,7 +971,7 @@ fn check_direwolf_conf(path: &str, duty: &DutyConfig) -> anyhow::Result<()> {
 }
 
 fn default_network() -> String {
-    "AX25IRC".into()
+    "RFIRC".into()
 }
 fn default_max_nick_len() -> usize {
     30
@@ -965,7 +995,7 @@ fn default_id_interval() -> u64 {
     540
 }
 fn default_id_text() -> String {
-    "AX25IRC gateway".into()
+    "RFIRC gateway".into()
 }
 fn default_paclen() -> usize {
     128
@@ -1341,7 +1371,7 @@ tx_pacing_ms = 0
     #[test]
     fn direwolf_conf_must_agree_with_the_governor() {
         let dir = std::env::temp_dir().join(format!(
-            "ax25ircd-dw-{}",
+            "rfircd-dw-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()

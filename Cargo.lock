@@ -30,28 +30,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ax25ircd"
-version = "0.8.0"
-dependencies = [
- "anyhow",
- "argon2",
- "password-hash",
- "rcgen",
- "ring",
- "rustls",
- "rustls-pemfile",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "tokio-rustls",
- "tokio-serial",
- "toml",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -460,6 +438,28 @@ name = "regex-syntax"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
+
+[[package]]
+name = "rfircd"
+version = "0.9.0"
+dependencies = [
+ "anyhow",
+ "argon2",
+ "password-hash",
+ "rcgen",
+ "ring",
+ "rustls",
+ "rustls-pemfile",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-rustls",
+ "tokio-serial",
+ "toml",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "ring"

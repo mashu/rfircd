@@ -1,15 +1,16 @@
-# AX25IRC design
+# rfircd design
 
 ## 1. What this is
 
-An IRC server that is simultaneously an AX.25 packet radio gateway. Two
+An IRC server that is simultaneously an RF packet gateway over KISS. Two
 populations share the same channels, and a third can write into them:
 
 * **IP users** with an ordinary IRC client (irssi) over TCP or TLS.
 * **RF stations** with a radio and a TNC, speaking a compact protocol (AIRC/1)
   carried in AX.25 UI frames.
 * **APRS radios** that message the gateway callsign. No AIRC client; a line
-  of the form `#rf hello` is injected into that channel.
+  of the form `#rf hello` is injected into that channel, and channel/DM
+  replies can be sent back as addressed APRS when needed.
 
 A message sent in a bridged channel reaches both. Nothing else does: the design
 is mostly about deciding what is *not* worth putting on the air.
@@ -243,7 +244,7 @@ RF-sourced text on a terminal must filter it first
 (`policy::strip_terminal_controls`), or a station within earshot can set the
 window title, clear the screen, or on a terminal that answers back, put its
 own text on the operator's shell prompt. The gateway sanitises before text
-reaches IRC; `ax25irc-station` filters everything it prints, including the
+reaches IRC; `rfirc-station` filters everything it prints, including the
 lines it composed itself, because filtering at the one exit is what keeps it
 true of paths added later.
 
@@ -251,7 +252,7 @@ Commands, flags, and what survives a restart: [usage.md](usage.md).
 
 A typical club setup: internet users join `#rf` to follow the QSO; only the
 control operator and nicks they have granted can key the transmitter.
-`ax25irc-station` is not an IRC client — it speaks AIRC over KISS.
+`rfirc-station` is not an IRC client — it speaks AIRC over KISS.
 
 If you need people on the internet to speak or control the transmitter,
 configure `[listen.tls]` (implicit TLS, typically port 6697). A plaintext
@@ -327,8 +328,8 @@ can be smuggled onto the air by waiting.
 ## 6.2 APRS interop
 
 A stock APRS radio (Kenwood, Yaesu, APRSdroid) does not speak AIRC. It can
-still put a line into a bridged channel by sending an APRS **message** whose
-addressee is the gateway callsign:
+still join the public RF QSO by sending an APRS **message** whose addressee
+is the gateway callsign:
 
 ```
 :SK0MT-1  :#rf hello from the trail{01
@@ -338,8 +339,15 @@ The AX.25 destination is a TOCALL (`APRS`, `APK004`, …); the addressee lives
 in the information field. The gateway ACKs (`ack01`) so the radio stops
 retrying — silence would cost more airtime than the ACK — and injects the
 text into `#rf`. AIRC stations already in that channel get a translated
-broadcast; they did not decode the APRS frame. Messages to anyone else are
-ignored.
+broadcast; they did not decode the APRS frame. A line `nick text` when that
+nick is online is delivered as an IRC query instead.
+
+Outbound: IRC channel chat and private messages reach APRS peers as addressed
+APRS (`nick: text{id}`), with msgid + ACK/retry. Under the default
+`radio.rf_mode = "airc"`, AIRC broadcast stays one frame per line and only
+APRS-dialect peers are fanned out. With `rf_mode = "aprs"`, the gateway
+encodes outbound chat as APRS only (one frame per RF peer in the channel; no
+AIRC CQ). JOIN/PART/numerics/MODE never go out as APRS.
 
 Position reports (`! = / @`, compressed, Mic-E) and status beacons (`>`)
 heard on frequency are shown on IRC as a channel NOTICE. That costs no
@@ -384,7 +392,7 @@ Typical deployment with Direwolf (step-by-step, including QMX:
 ```
 [direwolf]  ADEVICE plughw:1,0 / MODEM 1200 / KISSPORT 8001
      │  KISS over TCP :8001
-[ax25ircd]  radio.tnc.kind = "tcp", port 8001
+[rfircd]  radio.tnc.kind = "tcp", port 8001
      │  TCP :6667 on localhost (operator console)
      │  TLS :6697 for internet clients
 ```
@@ -410,14 +418,14 @@ RADIO REVOKE <nick>     take it away
 
 ## 8.1 Development without a radio
 
-`ax25irc-kisshub` is a virtual channel: every TCP client that connects is a
+`rfirc-kisshub` is a virtual channel: every TCP client that connects is a
 station on the same frequency, and a KISS frame from one is delivered to all
 the others. With it, the whole system runs on a laptop:
 
 ```sh
-ax25irc-kisshub --bind 127.0.0.1:8001 &
-ax25ircd -c ax25ircd.toml &
-ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+rfirc-kisshub --bind 127.0.0.1:8001 &
+rfircd -c rfircd.toml &
+rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
 ```
 
 The hub prints every frame in `axlisten` monitor format, which is how the

@@ -18,7 +18,7 @@ Docs: `mkdocs serve` from the repo root (`requirements-docs.txt`).
 ```
 src/
   lib.rs             crate root: layering and public modules
-  main.rs            ax25ircd — argument parsing, wiring, shutdown
+  main.rs            rfircd — argument parsing, wiring, shutdown
   config.rs          TOML config and validation
   callsign.rs        callsign/SSID type, nickname mapping
   aprs.rs            APRS message parse/encode (stock-radio interop)
@@ -29,12 +29,12 @@ src/
   irc/               message (parser), numerics, client (TCP task)
   server/            event loop, state, commands, mailbox
   bin/
-    ax25irc-station.rs
-    ax25irc-kisshub.rs
+    rfirc-station.rs
+    rfirc-kisshub.rs
 docs/                this site
 packaging/linux/     AppImage, .run, dist script
 tests/gateway.rs
-ax25ircd.example.toml
+rfircd.example.toml
 ```
 
 ## Not doing

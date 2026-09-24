@@ -1,21 +1,21 @@
 [package]
-name = "ax25ircd"
-version = "0.8.0"
+name = "rfircd"
+version = "0.9.0"
 edition = "2021"
 rust-version = "1.75"
-description = "IRC server with an AX.25 packet-radio gateway for amateur radio operators"
+description = "IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS) for amateur radio"
 license = "MIT"
 readme = "README.md"
-homepage = "https://mashu.github.io/ax25ircd/"
-repository = "https://github.com/mashu/ax25ircd"
-default-run = "ax25ircd"
+homepage = "https://mashu.github.io/rfircd/"
+repository = "https://github.com/mashu/rfircd"
+default-run = "rfircd"
 keywords = ["irc", "ax25", "ham-radio", "packet-radio", "amateur-radio"]
 categories = ["network-programming", "command-line-utilities"]
 
 # Three binaries, one library:
-#   ax25ircd           — IRC server + RF gateway  (src/main.rs)
-#   ax25irc-station    — radio-side client        (src/bin/)
-#   ax25irc-kisshub    — virtual channel for tests (src/bin/)
+#   rfircd           — IRC server + RF gateway  (src/main.rs)
+#   rfirc-station    — radio-side client        (src/bin/)
+#   rfirc-kisshub    — virtual channel for tests (src/bin/)
 # Cargo discovers those paths by convention.
 
 [dependencies]

@@ -7,14 +7,14 @@
 use std::sync::atomic::Ordering;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use ax25ircd::airc::{AircFrame, Kind};
-use ax25ircd::audit::Audit;
-use ax25ircd::ax25::airtime::AirtimeConfig;
-use ax25ircd::ax25::kiss::{self, KissDecoder};
-use ax25ircd::ax25::tnc::{self, TncConfig};
-use ax25ircd::ax25::Ax25Frame;
-use ax25ircd::config::InterlockConfig;
-use ax25ircd::interlock::{self, Check};
+use rfircd::airc::{AircFrame, Kind};
+use rfircd::audit::Audit;
+use rfircd::ax25::airtime::AirtimeConfig;
+use rfircd::ax25::kiss::{self, KissDecoder};
+use rfircd::ax25::tnc::{self, TncConfig};
+use rfircd::ax25::Ax25Frame;
+use rfircd::config::InterlockConfig;
+use rfircd::interlock::{self, Check};
 use tokio::io::{AsyncReadExt, AsyncWriteExt, DuplexStream};
 use tokio::sync::mpsc;
 
@@ -236,7 +236,7 @@ fn hf_packet() -> AirtimeConfig {
 #[tokio::test]
 async fn keyed_frames_are_audited_with_airtime_and_duty() {
     let path = std::env::temp_dir().join(format!(
-        "ax25ircd-tx-audit-{}.log",
+        "rfircd-tx-audit-{}.log",
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -531,7 +531,7 @@ async fn a_control_operator_can_slow_the_station_down_at_runtime() {
 async fn a_tnc_that_is_not_there_is_retried_not_fatal() {
     // Nothing is listening on this port.
     let (tnc, _rx) = tnc::spawn(TncConfig {
-        link: ax25ircd::ax25::TncLink::Tcp {
+        link: rfircd::ax25::TncLink::Tcp {
             host: "127.0.0.1".into(),
             port: 1,
         },
@@ -561,7 +561,7 @@ fn interlock_cfg(command: &str, args: &[&str]) -> InterlockConfig {
 #[tokio::test]
 async fn the_interlock_poller_tracks_the_command() {
     let dir = std::env::temp_dir().join(format!(
-        "ax25ircd-interlock-{}",
+        "rfircd-interlock-{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
@@ -572,7 +572,7 @@ async fn the_interlock_poller_tracks_the_command() {
 
     // "SWR is fine" means the file exists.
     let cfg = interlock_cfg("test", &["-f", flag.to_str().unwrap()]);
-    let shared = std::sync::Arc::new(ax25ircd::ax25::AirtimeShared::default());
+    let shared = std::sync::Arc::new(rfircd::ax25::AirtimeShared::default());
     interlock::spawn(cfg, shared.clone());
 
     // It starts blocked: nothing has passed yet.
@@ -664,7 +664,7 @@ async fn the_backlog_is_not_leaked_when_the_tnc_link_dies() {
     });
 
     let (tnc, _rx) = tnc::spawn(TncConfig {
-        link: ax25ircd::ax25::TncLink::Tcp {
+        link: rfircd::ax25::TncLink::Tcp {
             host: "127.0.0.1".into(),
             port: addr.port(),
         },

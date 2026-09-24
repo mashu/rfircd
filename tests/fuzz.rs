@@ -12,15 +12,15 @@
 
 use std::time::{Duration, Instant};
 
-use ax25ircd::airc::frame::{AircFrame, Kind};
-use ax25ircd::airc::{encode_fields, SessionConfig, Sessions};
-use ax25ircd::aprs::{AprsBeacon, AprsMessage};
-use ax25ircd::ax25::kiss::{self, KissDecoder};
-use ax25ircd::ax25::{Address, Ax25Frame};
-use ax25ircd::callsign::Callsign;
-use ax25ircd::config::PolicyConfig;
-use ax25ircd::irc::message::{is_channel_name, is_valid_nick, lower, Message};
-use ax25ircd::policy::{looks_like_ciphertext, sanitize, Policy};
+use rfircd::airc::frame::{AircFrame, Kind};
+use rfircd::airc::{encode_fields, SessionConfig, Sessions};
+use rfircd::aprs::{AprsBeacon, AprsMessage};
+use rfircd::ax25::kiss::{self, KissDecoder};
+use rfircd::ax25::{Address, Ax25Frame};
+use rfircd::callsign::Callsign;
+use rfircd::config::PolicyConfig;
+use rfircd::irc::message::{is_channel_name, is_valid_nick, lower, Message};
+use rfircd::policy::{looks_like_ciphertext, sanitize, Policy};
 
 /// Deterministic, dependency-free noise.
 struct Rng(u64);
@@ -85,7 +85,7 @@ fn aprs_decoding_survives_arbitrary_bytes() {
         }
         let _ = AprsBeacon::decode(&buf);
         let dest: Callsign = "APRS".parse().unwrap();
-        let _ = ax25ircd::aprs::decode_beacon(&dest, &buf);
+        let _ = rfircd::aprs::decode_beacon(&dest, &buf);
     }
 }
 
@@ -181,8 +181,8 @@ fn aprs_decoding_survives_well_formed_skeletons() {
         // The contract is the same as the random sweep: return, never panic.
         let _ = AprsBeacon::decode(&info);
         let _ = AprsMessage::decode(&info);
-        let _ = ax25ircd::aprs::decode_beacon(&dest, &info);
-        let _ = ax25ircd::aprs::decode_mice_frame("593P00", &info);
+        let _ = rfircd::aprs::decode_beacon(&dest, &info);
+        let _ = rfircd::aprs::decode_mice_frame("593P00", &info);
     }
 }
 
@@ -448,13 +448,13 @@ fn the_outbound_screen_never_panics_and_always_bounds_length() {
         );
         let _ = looks_like_ciphertext(&text);
         match policy.screen_outbound(&text) {
-            ax25ircd::policy::Verdict::Allow(t) => assert!(t.chars().count() <= 40),
-            ax25ircd::policy::Verdict::Truncated(t) => assert!(
+            rfircd::policy::Verdict::Allow(t) => assert!(t.chars().count() <= 40),
+            rfircd::policy::Verdict::Truncated(t) => assert!(
                 t.chars().count() <= 40,
                 "a truncated message must respect the cap: {} chars",
                 t.chars().count()
             ),
-            ax25ircd::policy::Verdict::Deny(_) => {}
+            rfircd::policy::Verdict::Deny(_) => {}
         }
     }
 }
@@ -698,8 +698,8 @@ fn a_peer_that_never_acknowledges_is_eventually_given_up_on() {
 /// can actually produce.
 #[test]
 fn the_governor_is_sane_across_the_configurable_range() {
-    use ax25ircd::ax25::airtime::{Governor, TxDecision, HARD_MAX_DUTY};
-    use ax25ircd::config::DutyConfig;
+    use rfircd::ax25::airtime::{Governor, TxDecision, HARD_MAX_DUTY};
+    use rfircd::config::DutyConfig;
 
     let mut rng = Rng::new(0xA1147123);
     for _ in 0..2_000 {

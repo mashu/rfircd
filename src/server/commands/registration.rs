@@ -217,7 +217,7 @@ impl Server {
             uid,
             num::RPL_YOURHOST,
             &[&format!(
-                "Your host is {server}, running ax25ircd {}",
+                "Your host is {server}, running rfircd {}",
                 env!("CARGO_PKG_VERSION")
             )],
         );
@@ -231,7 +231,7 @@ impl Server {
             num::RPL_MYINFO,
             &[
                 &server,
-                &format!("ax25ircd-{}", env!("CARGO_PKG_VERSION")),
+                &format!("rfircd-{}", env!("CARGO_PKG_VERSION")),
                 "iow",
                 "mnrtkl",
             ],

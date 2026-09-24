@@ -1,4 +1,4 @@
-//! External transmit interlock: a safety check ax25ircd does not itself know
+//! External transmit interlock: a safety check rfircd does not itself know
 //! how to make.
 //!
 //! The gateway cannot see the radio. It speaks KISS to a modem — Direwolf, a

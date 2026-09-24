@@ -453,6 +453,7 @@ impl Server {
         }
         self.policy.expire(now);
         self.radio.expire_aprs_msgids(now);
+        self.radio.tick_aprs(now);
         let dropped = self.radio.mailbox.expire(now);
         if dropped > 0 {
             debug!("{dropped} held messages expired");
@@ -655,31 +656,21 @@ impl Server {
                 truncated,
                 unicast,
             }) => {
-                let payload = encode_fields(&[target, from_nick, &text]);
-                let flags = if truncated {
-                    crate::airc::frame::flags::TRUNCATED
-                } else {
-                    0
-                };
                 if unicast {
-                    self.radio.unicast_flagged(
-                        call,
-                        Kind::Msg,
-                        payload,
-                        true,
-                        TxClass::Direct,
-                        flags,
-                    );
-                } else {
-                    self.radio
-                        .broadcast_flagged(Kind::Msg, payload, TxClass::Chat, flags);
+                    self.emit_direct_chat_rf(call, from_nick, &text, truncated);
+                    return;
                 }
+                // Channel chat is fanned out in `broadcast_channel_ex`.
+                let _ = target;
             }
             Some(RfEmission::Topic {
                 nick,
                 channel,
                 topic,
             }) => {
+                if !self.radio.rf_mode().is_airc() {
+                    return;
+                }
                 if !self.policy.topic_rate_ok(&channel, Instant::now()) {
                     return;
                 }
@@ -691,6 +682,9 @@ impl Server {
                 channel,
                 join,
             }) => {
+                if !self.radio.rf_mode().is_airc() {
+                    return;
+                }
                 if !self.policy.presence_rate_ok(&channel, Instant::now()) {
                     return;
                 }
@@ -702,9 +696,94 @@ impl Server {
         }
     }
 
+    /// Private message (or mailbox) to one RF station.
+    fn emit_direct_chat_rf(
+        &mut self,
+        call: &Callsign,
+        from_nick: &str,
+        text: &str,
+        truncated: bool,
+    ) {
+        if self.radio.wants_aprs(call) {
+            let mut body = format!("{from_nick}: {text}");
+            if truncated {
+                body.push('…');
+            }
+            let _ = self
+                .radio
+                .enqueue_aprs_chat(call, &body, TxClass::Direct, Instant::now());
+            return;
+        }
+        let target = call.to_nick();
+        let payload = encode_fields(&[&target, from_nick, text]);
+        let flags = if truncated {
+            crate::airc::frame::flags::TRUNCATED
+        } else {
+            0
+        };
+        self.radio
+            .unicast_flagged(call, Kind::Msg, payload, true, TxClass::Direct, flags);
+    }
+
+    fn emit_channel_chat_rf_to(
+        &mut self,
+        channel: &str,
+        rf_calls: &[Callsign],
+        from_nick: &str,
+        text: &str,
+        truncated: bool,
+    ) {
+        let now = Instant::now();
+        let mode = self.radio.rf_mode();
+        let need_airc = match mode {
+            crate::config::RfMode::Aprs => false,
+            crate::config::RfMode::Airc => {
+                rf_calls.is_empty()
+                    || rf_calls.iter().any(|c| {
+                        self.radio
+                            .sessions
+                            .peer(c)
+                            .map(|p| p.dialect == crate::airc::Dialect::Airc)
+                            .unwrap_or(false)
+                    })
+            }
+        };
+        if need_airc {
+            let payload = encode_fields(&[channel, from_nick, text]);
+            let flags = if truncated {
+                crate::airc::frame::flags::TRUNCATED
+            } else {
+                0
+            };
+            self.radio
+                .broadcast_flagged(Kind::Msg, payload, TxClass::Chat, flags);
+        }
+        let aprs_targets: Vec<Callsign> = rf_calls
+            .iter()
+            .filter(|c| match mode {
+                crate::config::RfMode::Aprs => true,
+                crate::config::RfMode::Airc => self
+                    .radio
+                    .sessions
+                    .peer(c)
+                    .is_some_and(|p| p.dialect == crate::airc::Dialect::Aprs),
+            })
+            .cloned()
+            .collect();
+        let mut body = format!("{from_nick}: {text}");
+        if truncated {
+            body.push('…');
+        }
+        for call in aprs_targets {
+            let _ = self
+                .radio
+                .enqueue_aprs_chat(&call, &body, TxClass::Chat, now);
+        }
+    }
+
     /// Send to every member of a channel, optionally skipping one user.
-    /// Broadcast RF deliveries are deduplicated: a channel message is put on
-    /// the air once, not once per listening station.
+    /// Broadcast RF deliveries are deduplicated: AIRC channel chat is put on
+    /// the air once; APRS peers each get an addressed copy.
     pub fn broadcast_channel(&mut self, channel: &str, d: &Delivery, except: Option<&UserId>) {
         self.broadcast_channel_ex(channel, d, except, true);
     }
@@ -720,28 +799,52 @@ impl Server {
         allow_rf: bool,
     ) {
         let members = self.state.members(channel);
-        let mut rf_done = false;
+        let emission = d.rf_emission(self.config.radio.presence_notices);
+        let mut rf_calls = Vec::new();
         for uid in members {
             if Some(&uid) == except {
                 continue;
             }
-            if uid.is_rf() {
-                if !allow_rf
-                    || rf_done
-                    || d.rf_emission(self.config.radio.presence_notices).is_none()
-                {
-                    continue;
+            match &uid {
+                UserId::Ip(id) => {
+                    if let Some(line) = render_irc(d) {
+                        self.send_raw(*id, line);
+                    }
                 }
-                rf_done = true;
+                UserId::Rf(call) => {
+                    rf_calls.push(call.clone());
+                }
             }
-            self.deliver(&uid, d);
         }
-        // CQ: radiate even when no RF nick is in the channel. Channel chat is
-        // a broadcast, so there is no destination callsign to hang this on.
-        if allow_rf && !rf_done {
-            if let Some(call) = self.config.gateway_callsign() {
-                self.deliver_rf(&call, d);
+
+        if !allow_rf {
+            return;
+        }
+        match emission {
+            Some(RfEmission::Chat {
+                from_nick,
+                text,
+                truncated,
+                unicast: false,
+                ..
+            }) => {
+                self.emit_channel_chat_rf_to(channel, &rf_calls, from_nick, &text, truncated);
             }
+            Some(RfEmission::Chat { unicast: true, .. }) => {}
+            Some(RfEmission::Topic { .. }) | Some(RfEmission::Presence { .. }) => {
+                if !self.radio.rf_mode().is_airc() {
+                    return;
+                }
+                // One AIRC transmission for the channel.
+                if let Some(call) = rf_calls
+                    .first()
+                    .cloned()
+                    .or_else(|| self.config.gateway_callsign())
+                {
+                    self.deliver_rf(&call, d);
+                }
+            }
+            None => {}
         }
     }
 

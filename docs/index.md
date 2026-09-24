@@ -1,13 +1,13 @@
-# ax25ircd
+# rfircd
 
-An IRC server that is also an AX.25 packet-radio gateway. People with an
-ordinary IRC client, people with a radio and a TNC, and people with a stock
-APRS radio talk in the same channels.
+An IRC server with an RF gateway over KISS (Direwolf or any KISS TNC). People
+with an ordinary IRC client, people with a radio speaking AIRC, and people
+with a stock APRS radio talk in the same channels.
 
-![QMX to Direwolf to ax25ircd to IRC](assets/chain.png)
+![QMX to Direwolf to rfircd to IRC](assets/chain.png)
 
-Three binaries: **`ax25ircd`** (gateway), **`ax25irc-station`** (radio-side
-client), **`ax25irc-kisshub`** (virtual channel, no licence).
+Three binaries: **`rfircd`** (gateway), **`rfirc-station`** (radio-side
+client), **`rfirc-kisshub`** (virtual channel, no licence).
 
 !!! warning "Read this before you transmit"
     Enabling `radio.enabled` makes your station transmit automatically, under

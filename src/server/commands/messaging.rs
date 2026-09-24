@@ -118,7 +118,8 @@ impl Server {
             let mut allow_rf = air.is_some()
                 && chan.rf
                 && self.radio.available()
-                && (chan.has_rf_members() || self.user_may_tx_rf(uid));
+                && (chan.has_rf_members()
+                    || (self.config.radio.rf_mode.is_airc() && self.user_may_tx_rf(uid)));
             let mut rf_flooded = false;
             if allow_rf {
                 if !self.policy.rf_channel_rate_ok(

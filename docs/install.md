@@ -11,7 +11,7 @@ guessed and writes a configuration that is known to come up — it parses and
 validates the result before anything reaches the disk:
 
 ```sh
-ax25ircd --init -c ~/.config/ax25ircd/ax25ircd.toml
+rfircd --init -c ~/.config/rfircd/rfircd.toml
 ```
 
 Six questions: server name, whether you have a radio (and if so your callsign,
@@ -53,39 +53,39 @@ reaches the antenna is in the clear, by law and by design.
 Default prefix is `~/.local`. Existing config is never overwritten.
 
 ```sh
-curl -fsSL -o ax25ircd.run \
-  https://github.com/mashu/ax25ircd/releases/latest/download/ax25ircd-x86_64.run
-chmod +x ax25ircd.run
-./ax25ircd.run
+curl -fsSL -o rfircd.run \
+  https://github.com/mashu/rfircd/releases/latest/download/rfircd-x86_64.run
+chmod +x rfircd.run
+./rfircd.run
 ```
 
 It offers the setup questions above when it finds no configuration and you are
 at a terminal. To run them later, or after declining:
 
 ```sh
-ax25ircd --init -c ~/.config/ax25ircd/ax25ircd.toml
+rfircd --init -c ~/.config/rfircd/rfircd.toml
 ```
 
-`sudo ./ax25ircd.run --system` installs to `/usr/local`. `--extract DIR` unpacks
-without installing. ARM: `ax25ircd-aarch64.run`.
+`sudo ./rfircd.run --system` installs to `/usr/local`. `--extract DIR` unpacks
+without installing. ARM: `rfircd-aarch64.run`.
 
 ## AppImage
 
 ```sh
-curl -fsSL -o ax25ircd.AppImage \
-  https://github.com/mashu/ax25ircd/releases/latest/download/ax25ircd-x86_64.AppImage
-chmod +x ax25ircd.AppImage
-./ax25ircd.AppImage -c ~/.config/ax25ircd/ax25ircd.toml
-./ax25ircd.AppImage station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
-./ax25ircd.AppImage kisshub --bind 127.0.0.1:8001
+curl -fsSL -o rfircd.AppImage \
+  https://github.com/mashu/rfircd/releases/latest/download/rfircd-x86_64.AppImage
+chmod +x rfircd.AppImage
+./rfircd.AppImage -c ~/.config/rfircd/rfircd.toml
+./rfircd.AppImage station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+./rfircd.AppImage kisshub --bind 127.0.0.1:8001
 ```
 
 ## Tarball
 
 ```sh
-curl -fsSL -O https://github.com/mashu/ax25ircd/releases/latest/download/ax25ircd-x86_64-linux.tar.gz
-tar xf ax25ircd-x86_64-linux.tar.gz
-./ax25ircd-*/install.sh
+curl -fsSL -O https://github.com/mashu/rfircd/releases/latest/download/rfircd-x86_64-linux.tar.gz
+tar xf rfircd-x86_64-linux.tar.gz
+./rfircd-*/install.sh
 ```
 
 ## From source
@@ -95,16 +95,16 @@ uses Direwolf over TCP KISS, so the default build is enough.
 
 ```sh
 cargo build --release
-./target/release/ax25ircd --init -c ax25ircd.toml
-./target/release/ax25ircd -c ax25ircd.toml
+./target/release/rfircd --init -c rfircd.toml
+./target/release/rfircd -c rfircd.toml
 ```
 
 Or by hand — the minimum is `server.name`, plus `radio.callsign` and a channel
 with `rf = true` if you will transmit:
 
 ```sh
-cp ax25ircd.example.toml ax25ircd.toml
-./target/release/ax25ircd --check -c ax25ircd.toml
+cp rfircd.example.toml rfircd.toml
+./target/release/rfircd --check -c rfircd.toml
 ```
 
 Connect on `127.0.0.1:6667` and join `#local`. Leave `radio.enabled = false`

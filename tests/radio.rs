@@ -8,13 +8,13 @@
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use ax25ircd::airc::{encode_fields, AircFrame, Kind};
-use ax25ircd::ax25::kiss::{self, KissDecoder};
-use ax25ircd::ax25::tnc::{self, TncConfig};
-use ax25ircd::ax25::Ax25Frame;
-use ax25ircd::callsign::Callsign;
-use ax25ircd::config::Config;
-use ax25ircd::server::{IdentifyResult, Radio, TxClass};
+use rfircd::airc::{encode_fields, AircFrame, Kind};
+use rfircd::ax25::kiss::{self, KissDecoder};
+use rfircd::ax25::tnc::{self, TncConfig};
+use rfircd::ax25::Ax25Frame;
+use rfircd::callsign::Callsign;
+use rfircd::config::Config;
+use rfircd::server::{IdentifyResult, Radio, TxClass};
 use tokio::io::{AsyncReadExt, DuplexStream};
 
 const CONFIG: &str = r##"
@@ -347,7 +347,7 @@ async fn radio_id_is_rate_limited_unless_the_station_owes_one() {
 
 #[tokio::test]
 async fn held_mail_is_not_destroyed_when_the_transmitter_is_off() {
-    use ax25ircd::server::mailbox::StoredMessage;
+    use rfircd::server::mailbox::StoredMessage;
 
     let mut h = Harness::new();
     h.radio
@@ -374,7 +374,7 @@ async fn held_mail_is_not_destroyed_when_the_transmitter_is_off() {
 
 #[tokio::test]
 async fn held_mail_is_not_destroyed_when_the_session_queue_is_full() {
-    use ax25ircd::server::mailbox::StoredMessage;
+    use rfircd::server::mailbox::StoredMessage;
 
     let mut h = Harness::new();
     for _ in 0..20 {
@@ -540,8 +540,8 @@ async fn radio_off_does_not_burn_ack_retries() {
 
 #[tokio::test]
 async fn a_shortened_held_message_is_flagged_as_shortened_on_the_air() {
-    use ax25ircd::airc::frame::flags;
-    use ax25ircd::server::mailbox::StoredMessage;
+    use rfircd::airc::frame::flags;
+    use rfircd::server::mailbox::StoredMessage;
 
     let mut h = Harness::new();
     h.radio

@@ -2,10 +2,15 @@
 **/*.rs.bk
 
 # Operator copy of the example config; never commit a live one.
-/ax25ircd.toml
+/rfircd.toml
 /nicks.json
-/ax25ircd.log
+/rfircd.log
 /audit.log
+
+# Leftover names from the ax25ircd → rfircd rename (local only).
+/ax25ircd.toml
+/ax25ircd.log
+/ax25ircd-*.run
 
 /dist/
 /site

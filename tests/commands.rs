@@ -9,9 +9,9 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
-use ax25ircd::config::Config;
-use ax25ircd::server::state::ClientId;
-use ax25ircd::server::{Event, Server};
+use rfircd::config::Config;
+use rfircd::server::state::ClientId;
+use rfircd::server::{Event, Server};
 use tokio::sync::mpsc;
 
 fn unique_accounts_file() -> String {
@@ -170,7 +170,7 @@ fn registration_sends_the_expected_welcome_burst() {
     assert!(
         lines
             .iter()
-            .any(|l| l.contains(&format!("ax25ircd-{}", env!("CARGO_PKG_VERSION")))),
+            .any(|l| l.contains(&format!("rfircd-{}", env!("CARGO_PKG_VERSION")))),
         "004 should advertise this build, not a frozen version: {lines:?}"
     );
     assert!(
@@ -306,7 +306,7 @@ fn user_username_cannot_contain_prefix_delimiters() {
     assert!(
         !n.server
             .state
-            .user(&ax25ircd::server::state::UserId::Ip(a))
+            .user(&rfircd::server::state::UserId::Ip(a))
             .unwrap()
             .registered,
         "a refused USER must not complete registration"
@@ -1579,8 +1579,8 @@ fn a_line_that_is_not_a_message_is_ignored() {
     assert!(n.ask(a, "PING :ok").iter().any(|l| l.contains("PONG")));
 }
 
-fn user_id(id: ClientId) -> ax25ircd::server::state::UserId {
-    ax25ircd::server::state::UserId::Ip(id)
+fn user_id(id: ClientId) -> rfircd::server::state::UserId {
+    rfircd::server::state::UserId::Ip(id)
 }
 
 // ------------------------------------------------- releasing a registered nick
@@ -1660,7 +1660,7 @@ fn a_user_is_disconnected_if_even_the_guest_name_is_taken() {
 /// The names the server hands out must be names it would accept.
 #[test]
 fn guest_names_are_not_in_the_reserved_callsign_space() {
-    use ax25ircd::callsign::Callsign;
+    use rfircd::callsign::Callsign;
     for id in [0u64, 1, 2, 7, 42, 12345] {
         let guest = format!("Guest_{id}");
         assert!(
@@ -1668,7 +1668,7 @@ fn guest_names_are_not_in_the_reserved_callsign_space() {
             "{guest} would be refused if a client asked for it"
         );
         assert!(
-            ax25ircd::irc::message::is_valid_nick(&guest, 30),
+            rfircd::irc::message::is_valid_nick(&guest, 30),
             "{guest} must still be a legal nickname"
         );
     }
@@ -1695,8 +1695,8 @@ fn a_client_that_never_registers_is_reaped_by_the_tick() {
 
 #[test]
 fn a_password_check_that_finishes_after_a_nick_change_is_discarded() {
-    use ax25ircd::accounts::AccountError;
-    use ax25ircd::server::AuthKind;
+    use rfircd::accounts::AccountError;
+    use rfircd::server::AuthKind;
 
     let mut n = Net::new();
     let a = n.client(1, "alice");
@@ -1828,10 +1828,10 @@ fn a_released_nick_never_exceeds_the_configured_length() {
     // The server picks the replacement name itself, so it has to obey its own
     // rules — a `Guest_…` longer than `max_nick_len` is a nick the server
     // would refuse if a client asked for it.
-    use ax25ircd::irc::message::is_valid_nick;
+    use rfircd::irc::message::is_valid_nick;
     let max = 12usize;
     for id in [0u64, 9, 99, 999_999, u64::MAX] {
-        let guest = ax25ircd::server::guest_nick(id, max);
+        let guest = rfircd::server::guest_nick(id, max);
         assert!(
             is_valid_nick(&guest, max),
             "{guest} is not a nickname this server would accept at max_nick_len={max}"

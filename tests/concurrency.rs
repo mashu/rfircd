@@ -9,9 +9,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use ax25ircd::config::Config;
-use ax25ircd::irc::client::{listen, ListenerOptions};
-use ax25ircd::server::{self, Event, Server};
+use rfircd::config::Config;
+use rfircd::irc::client::{listen, ListenerOptions};
+use rfircd::server::{self, Event, Server};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;

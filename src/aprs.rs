@@ -217,6 +217,28 @@ pub fn reply_info(to: &Callsign, text: &str) -> Vec<u8> {
     .encode()
 }
 
+/// Chat text with a message ID so the far radio will ACK (and we can retry).
+pub fn message_info(to: &Callsign, text: &str, msgid: &str) -> Vec<u8> {
+    let text: String = text.chars().take(67).collect();
+    AprsMessage {
+        addressee: to.to_string(),
+        text,
+        msgid: Some(msgid.to_string()),
+        kind: AprsKind::Message,
+    }
+    .encode()
+}
+
+/// `ackNN` / `rejNN` payload id, if this is a control reply to one of ours.
+pub fn control_msgid(msg: &AprsMessage) -> Option<&str> {
+    let t = msg.text.trim();
+    match msg.kind {
+        AprsKind::Ack => t.strip_prefix("ack").filter(|id| msgid_ok(id)),
+        AprsKind::Reject => t.strip_prefix("rej").filter(|id| msgid_ok(id)),
+        AprsKind::Message => None,
+    }
+}
+
 /// Split `#channel body` from an APRS message body.
 ///
 /// If the text does not start with a channel name and `default_channel` is

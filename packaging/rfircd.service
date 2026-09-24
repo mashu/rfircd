@@ -1,26 +1,26 @@
-# systemd unit for ax25ircd.
+# systemd unit for rfircd.
 #
-#   install -m0755 target/release/ax25ircd /usr/local/bin/
-#   install -m0640 -o ax25ircd ax25ircd.toml /etc/ax25ircd.toml
-#   useradd --system --no-create-home --shell /usr/sbin/nologin ax25ircd
-#   systemctl enable --now ax25ircd
+#   install -m0755 target/release/rfircd /usr/local/bin/
+#   install -m0640 -o rfircd rfircd.toml /etc/rfircd.toml
+#   useradd --system --no-create-home --shell /usr/sbin/nologin rfircd
+#   systemctl enable --now rfircd
 #
 # If the TNC is a serial port, add the service user to the dialout group and
 # drop the DevicePolicy line below.
 
 [Unit]
-Description=AX25IRC gateway (IRC server with AX.25 packet radio bridge)
-Documentation=file:/usr/share/doc/ax25ircd/design.md
+Description=rfircd (IRC server with RF gateway over KISS/Direwolf)
+Documentation=file:/usr/share/doc/rfircd/design.md
 After=network-online.target direwolf.service
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=ax25ircd
-Group=ax25ircd
-ExecStart=/usr/local/bin/ax25ircd --config /etc/ax25ircd.toml
-ExecStartPre=/usr/local/bin/ax25ircd --check --config /etc/ax25ircd.toml
-Environment=RUST_LOG=ax25ircd=info
+User=rfircd
+Group=rfircd
+ExecStart=/usr/local/bin/rfircd --config /etc/rfircd.toml
+ExecStartPre=/usr/local/bin/rfircd --check --config /etc/rfircd.toml
+Environment=RUST_LOG=rfircd=info
 Restart=on-failure
 RestartSec=5s
 

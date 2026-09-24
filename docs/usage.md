@@ -63,18 +63,18 @@ the callsign after connect.
 A dedicated config (nothing else in it) lives next to the gateway config:
 
 ```
-# ~/.config/ax25ircd/irssi.conf  —  irssi --config=this-file
+# ~/.config/rfircd/irssi.conf  —  irssi --config=this-file
 servers = (
   {
     address = "127.0.0.1";
-    chatnet = "ax25irc";
+    chatnet = "rfirc";
     port = "6667";
     use_tls = "no";
     autoconnect = "yes";
   }
 );
 chatnets = {
-  ax25irc = { type = "IRC"; nick = "alice"; };
+  rfirc = { type = "IRC"; nick = "alice"; };
 };
 settings = {
   core = {
@@ -84,15 +84,15 @@ settings = {
   };
 };
 channels = (
-  { name = "#rf"; chatnet = "ax25irc"; autojoin = "Yes"; }
+  { name = "#rf"; chatnet = "rfirc"; autojoin = "Yes"; }
 );
 ignores = ( );
 ```
 
 ```
-mkdir -p ~/.config/ax25ircd
+mkdir -p ~/.config/rfircd
 # save the file above, then:
-irssi --config=~/.config/ax25ircd/irssi.conf
+irssi --config=~/.config/rfircd/irssi.conf
 ```
 
 Once connected:
@@ -177,13 +177,13 @@ A new event type does not go on the air until someone adds it to the list.
 No radio and no licence: a virtual frequency plus the station client. This is
 the way to see RF nicks and messages in irssi.
 
-In `ax25ircd.toml`, `[radio] enabled = true` and `[radio.tnc]` pointing at
+In `rfircd.toml`, `[radio] enabled = true` and `[radio.tnc]` pointing at
 kisshub (`host = "127.0.0.1"`, `port = 8001`). Then:
 
 ```sh
-./target/release/ax25irc-kisshub --bind 127.0.0.1:8001
-./target/release/ax25ircd -c ax25ircd.toml
-./target/release/ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+./target/release/rfirc-kisshub --bind 127.0.0.1:8001
+./target/release/rfircd -c rfircd.toml
+./target/release/rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
 ```
 
 In irssi (localhost, as above): `/join #rf`. The station appears as
@@ -199,7 +199,7 @@ They are not the same account.
 
 * **Internet user** — ordinary nick (`alice`). Registers, may be granted RF-TX,
   claims a callsign with `CALLSIGN`. The nick itself is not a callsign.
-* **RF station** — `ax25irc-station` or any AIRC client. Already on the air.
+* **RF station** — `rfirc-station` or any AIRC client. Already on the air.
   Appears as a reserved nick derived from the AX.25 source (`SM0ABC-7` →
   `SM0ABC|7`). No `REGISTER`, no `RADIO GRANT`. Restrict with
   `policy.allow_callsigns` / `deny_callsigns`.
@@ -229,7 +229,7 @@ without RF-TX stays on IRC until a station is in the channel.
 A control operator (`OPER`) has RF-TX for that session without a grant. They
 still need `CALLSIGN` before their text is radiated. On a public
 `listen.bind`, `[[opers]]` passwords must be Argon2id hashes from
-`ax25ircd --hash-password`; plaintext is accepted only on loopback.
+`rfircd --hash-password`; plaintext is accepted only on loopback.
 
 ```
 /oper root the-oper-password
@@ -240,7 +240,7 @@ still need `CALLSIGN` before their text is radiated. On a public
 The station transmits with its own radio. The gateway does not grant it RF-TX.
 
 ```sh
-ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
 ```
 
 If `allow_callsigns` is empty, any plausible amateur callsign may use the RF
@@ -259,7 +259,13 @@ config) from any APRS HT or app:
 The gateway ACKs so the radio's retry cycle stops, the station appears in
 the channel as `SM0ABC|7`, and the line shows up on IRC. AIRC stations
 already in `#rf` hear a translated copy; they did not decode the APRS
-frame. Messages to anyone else are ignored.
+frame. A line `alice hello` when `alice` is online is a private query to
+that nick instead.
+
+Replies: `/msg SM0ABC|7 …` or channel chat in `#rf` while that station is
+present goes back as an addressed APRS message (`nick: text`). Set
+`radio.rf_mode = "aprs"` if you want *all* outbound RF chat as APRS (no AIRC
+CQ). IRC JOIN/PART/MODE/numerics are never put on the air as APRS.
 
 Position reports and status beacons heard on frequency are shown in the
 channel as a NOTICE (`-SM0ABC|7- 59°30.00N 018°03.00E - QTH`). They are
@@ -394,7 +400,7 @@ on restart. See `mailbox_*` in the config.
 
 ## Configuration
 
-Every option is documented inline in `ax25ircd.example.toml`. Unknown keys are
+Every option is documented inline in `rfircd.example.toml`. Unknown keys are
 refused. The validator also refuses an identification interval over ten
 minutes, a gateway "callsign" that is not a plausible callsign, more than two
 digipeater hops, and `radio.enabled` with no bridged channel.

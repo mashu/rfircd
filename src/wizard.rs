@@ -1,7 +1,7 @@
-//! `ax25ircd --init`: the questions that turn an empty directory into a
+//! `rfircd --init`: the questions that turn an empty directory into a
 //! working configuration.
 //!
-//! The installer copies `ax25ircd.example.toml` and tells you to edit it. That
+//! The installer copies `rfircd.example.toml` and tells you to edit it. That
 //! is fine if you already know what `paclen` and `txdelay` are, and a wall of
 //! commented TOML if you do not. This asks the six things that cannot be
 //! guessed, writes a small config, and refuses to write one that does not
@@ -141,7 +141,7 @@ fn tidy_server_name(raw: &str) -> String {
         .filter(|c| c.is_ascii_alphanumeric() || *c == '.' || *c == '-')
         .collect();
     if cleaned.is_empty() {
-        "ax25irc.local".into()
+        "rfirc.local".into()
     } else if cleaned.contains('.') {
         cleaned
     } else {
@@ -306,7 +306,7 @@ pub fn interview<R: BufRead, W: Write>(
 ) -> anyhow::Result<Answers> {
     writeln!(
         out,
-        "ax25ircd setup. Enter accepts the value in brackets.\n\
+        "rfircd setup. Enter accepts the value in brackets.\n\
          Nothing is written until the end, and an existing config is never replaced.\n"
     )?;
 
@@ -316,7 +316,7 @@ pub fn interview<R: BufRead, W: Write>(
         "Server name, as IRC clients will see it",
         &defaults.server_name,
     )?;
-    let network = ask(inp, out, "Network name", "AX25IRC")?;
+    let network = ask(inp, out, "Network name", "RFIRC")?;
 
     writeln!(
         out,
@@ -428,7 +428,7 @@ fn ask_radio<R: BufRead, W: Write>(inp: &mut R, out: &mut W) -> anyhow::Result<R
         "\n  Enabling the transmitter means this station keys up automatically,\n\
          \x20 under your licence, carrying other people's traffic. You are the\n\
          \x20 control operator for everything it sends. Read the regulatory notes\n\
-         \x20 first: https://mashu.github.io/ax25ircd/ (Regulatory).\n\
+         \x20 first: https://mashu.github.io/rfircd/ (Regulatory).\n\
          \x20 Answering no configures everything and leaves it receive-only; you\n\
          \x20 turn it on later by setting radio.enabled = true."
     )?;
@@ -556,8 +556,8 @@ fn toml_str(s: &str) -> String {
 pub fn render(a: &Answers) -> String {
     let mut s = String::new();
     s.push_str(
-        "# Written by `ax25ircd --init`. Every setting not named here keeps its\n\
-         # default; the full annotated list is in ax25ircd.example.toml.\n\n",
+        "# Written by `rfircd --init`. Every setting not named here keeps its\n\
+         # default; the full annotated list is in rfircd.example.toml.\n\n",
     );
 
     s.push_str("[server]\n");
@@ -633,7 +633,7 @@ pub fn render(a: &Answers) -> String {
     if let Some(o) = &a.oper {
         s.push_str(
             "\n# Argon2id hash — the password itself was never written anywhere.\n\
-             # Replace it with `ax25ircd --hash-password` output to change it.\n",
+             # Replace it with `rfircd --hash-password` output to change it.\n",
         );
         s.push_str("[[opers]]\n");
         s.push_str(&format!("name = {}\n", toml_str(&o.name)));
@@ -733,7 +733,7 @@ pub fn run_with<R: BufRead, W: Write>(
     let target = Path::new(path);
     if target.exists() {
         anyhow::bail!(
-            "{} already exists — not replacing it. Check it with `ax25ircd --check -c {}`, \
+            "{} already exists — not replacing it. Check it with `rfircd --check -c {}`, \
              or move it aside and run --init again.",
             target.display(),
             target.display()
@@ -784,8 +784,8 @@ pub fn run_with<R: BufRead, W: Write>(
         )?;
     }
     writeln!(out, "\nnext:")?;
-    writeln!(out, "  ax25ircd --check -c {}", target.display())?;
-    writeln!(out, "  ax25ircd -c {}", target.display())?;
+    writeln!(out, "  rfircd --check -c {}", target.display())?;
+    writeln!(out, "  rfircd -c {}", target.display())?;
     if let Some(r) = &answers.radio {
         if !r.enabled {
             writeln!(
@@ -808,7 +808,7 @@ mod tests {
         let mut out: Vec<u8> = Vec::new();
         let defaults = Defaults {
             server_name: "test.local".into(),
-            conf_dir: PathBuf::from("/etc/ax25ircd"),
+            conf_dir: PathBuf::from("/etc/rfircd"),
             // Never true in a test: `stty` would act on the real terminal.
             terminal: false,
         };
@@ -876,7 +876,7 @@ mod tests {
 
     fn scratch(tag: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "ax25ircd-wizard-{tag}-{}-{}",
+            "rfircd-wizard-{tag}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -895,7 +895,7 @@ mod tests {
     #[test]
     fn generating_tls_produces_a_config_that_validates() {
         let dir = scratch("tls");
-        let path = dir.join("ax25ircd.toml");
+        let path = dir.join("rfircd.toml");
         let defaults = Defaults {
             server_name: "gw.example".into(),
             conf_dir: dir.clone(),
@@ -1092,7 +1092,7 @@ mod tests {
         let key = dir.join("mine-key.pem");
         write_self_signed(vec!["gw.example".into()], &cert, &key).expect("pair");
 
-        let path = dir.join("ax25ircd.toml");
+        let path = dir.join("rfircd.toml");
         let defaults = Defaults {
             server_name: "gw.example".into(),
             conf_dir: dir.clone(),
@@ -1130,7 +1130,7 @@ mod tests {
     #[test]
     fn the_closing_advice_says_the_transmitter_is_off() {
         let dir = scratch("advice");
-        let path = dir.join("ax25ircd.toml");
+        let path = dir.join("rfircd.toml");
         let defaults = Defaults {
             server_name: "gw.example".into(),
             conf_dir: dir.clone(),
@@ -1160,7 +1160,7 @@ mod tests {
     fn a_serial_tnc_renders() {
         let a = Answers {
             server_name: "gw.example".into(),
-            network: "AX25IRC".into(),
+            network: "RFIRC".into(),
             plain_bind: "127.0.0.1:6667".into(),
             radio: Some(RadioAnswers {
                 callsign: "SK0MT-1".parse().unwrap(),
@@ -1234,8 +1234,8 @@ mod tests {
         // `_` is not legal in a hostname and is filtered rather than kept.
         assert_eq!(tidy_server_name("my_box"), "mybox.local");
         // `hostname` missing or silent.
-        assert_eq!(tidy_server_name(""), "ax25irc.local");
-        assert_eq!(tidy_server_name("   "), "ax25irc.local");
+        assert_eq!(tidy_server_name(""), "rfirc.local");
+        assert_eq!(tidy_server_name("   "), "rfirc.local");
     }
 
     /// Paths with no directory component. `write_self_signed` and the config
@@ -1264,10 +1264,10 @@ mod tests {
 
     #[test]
     fn certificates_go_beside_the_config_file() {
-        let d = Defaults::for_config_path(Path::new("/etc/ax25ircd/ax25ircd.toml"));
-        assert_eq!(d.conf_dir, PathBuf::from("/etc/ax25ircd"));
+        let d = Defaults::for_config_path(Path::new("/etc/rfircd/rfircd.toml"));
+        assert_eq!(d.conf_dir, PathBuf::from("/etc/rfircd"));
         // A bare filename means the working directory, not the filesystem root.
-        let d = Defaults::for_config_path(Path::new("ax25ircd.toml"));
+        let d = Defaults::for_config_path(Path::new("rfircd.toml"));
         assert_eq!(d.conf_dir, PathBuf::from("."));
     }
 
@@ -1286,7 +1286,7 @@ mod tests {
     #[test]
     fn an_abandoned_run_writes_nothing() {
         let dir = scratch("abandoned");
-        let path = dir.join("ax25ircd.toml");
+        let path = dir.join("rfircd.toml");
         let defaults = Defaults {
             server_name: "gw.example".into(),
             conf_dir: dir.clone(),
@@ -1325,7 +1325,7 @@ mod tests {
     #[test]
     fn a_generated_certificate_loads_as_a_tls_config() {
         let dir = std::env::temp_dir().join(format!(
-            "ax25ircd-wizard-{}-{}",
+            "rfircd-wizard-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -1355,7 +1355,7 @@ mod tests {
     #[test]
     fn an_existing_config_is_never_replaced() {
         let path = std::env::temp_dir().join(format!(
-            "ax25ircd-wizard-existing-{}-{}.toml",
+            "rfircd-wizard-existing-{}-{}.toml",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -1,10 +1,10 @@
 # QMX on Debian
 
 The QMX is the radio, not a TNC. One USB-C cable gives Debian a sound card and
-a CAT serial port. Direwolf turns that into AX.25 KISS. ax25ircd is the IRC
+a CAT serial port. Direwolf turns that into AX.25 KISS. rfircd is the IRC
 server that speaks KISS. **Do not put the QMX in Digi mode.**
 
-![QMX USB into Direwolf, KISS into ax25ircd, TCP to IRC](assets/chain.png)
+![QMX USB into Direwolf, KISS into rfircd, TCP to IRC](assets/chain.png)
 
 !!! warning "Before you enable the radio"
     Automatic control and third-party traffic are the two rules that bite
@@ -110,27 +110,27 @@ direwolf -c direwolf-qmx.conf
 ```
 
 Leave this terminal running. It should listen on KISS TCP port 8001.
-`AGWPORT 0` turns off Direwolf's AGW server (port 8000). ax25ircd speaks KISS,
+`AGWPORT 0` turns off Direwolf's AGW server (port 8000). rfircd speaks KISS,
 not AGW, and 8000 is often already taken.
 
-## 5. Install ax25ircd
+## 5. Install rfircd
 
 See [Install](install.md). Short version:
 
 ```sh
-curl -fsSL -o ax25ircd.run \
-  https://github.com/mashu/ax25ircd/releases/latest/download/ax25ircd-x86_64.run
-chmod +x ax25ircd.run
-./ax25ircd.run
+curl -fsSL -o rfircd.run \
+  https://github.com/mashu/rfircd/releases/latest/download/rfircd-x86_64.run
+chmod +x rfircd.run
+./rfircd.run
 ```
 
-AppImage subcommands: `./ax25ircd.AppImage station …` and
-`./ax25ircd.AppImage kisshub …`. ARM: aarch64 tarball or `.run` from
-[Releases](https://github.com/mashu/ax25ircd/releases/latest).
+AppImage subcommands: `./rfircd.AppImage station …` and
+`./rfircd.AppImage kisshub …`. ARM: aarch64 tarball or `.run` from
+[Releases](https://github.com/mashu/rfircd/releases/latest).
 
 ## 6. Edit the gateway config
 
-The installer writes `~/.config/ax25ircd/ax25ircd.toml` if that file did not
+The installer writes `~/.config/rfircd/rfircd.toml` if that file did not
 exist. Set `server.name`, **your** callsign, and turn the radio on only when
 Direwolf is already listening.
 
@@ -164,7 +164,7 @@ cooldown_secs = 60
 hourly_airtime_secs = 900
 max_hold_secs = 120
 
-# Required if you will leave the transmitter unattended. ax25ircd cannot see
+# Required if you will leave the transmitter unattended. rfircd cannot see
 # SWR or PA temperature — Direwolf already holds the CAT port for PTT.
 # The command fails closed: until it exits 0, nothing is keyed, IDs included.
 [radio.interlock]
@@ -192,7 +192,7 @@ timeout_secs = 5
     with a loopback TNC. `--check` catches all three before you key up.
 
 ```sh
-ax25ircd --check -c ~/.config/ax25ircd/ax25ircd.toml
+rfircd --check -c ~/.config/rfircd/rfircd.toml
 ```
 
 The checker refuses a fake callsign, an ID interval over ten minutes, and
@@ -201,7 +201,7 @@ The checker refuses a fake callsign, an ID interval over ten minutes, and
 ## 7. Start the gateway, then the IRC client
 
 ```sh
-ax25ircd -c ~/.config/ax25ircd/ax25ircd.toml
+rfircd -c ~/.config/rfircd/rfircd.toml
 # another terminal:
 irssi
 #  /connect 127.0.0.1 6667
@@ -214,7 +214,7 @@ irssi
 
 `RADIO` should show the transmitter **ON**. `#rf` is `+rm`: without a callsign
 you can listen, you cannot speak. Without RF-TX your speech stays on IRC.
-Change the example OPER password, and hash it (`ax25ircd --hash-password`),
+Change the example OPER password, and hash it (`rfircd --hash-password`),
 before you bind to a public address.
 
 ## 8. First message that actually keys the radio
@@ -237,16 +237,16 @@ line in `#rf`. If `notice_air_relay` is on, the server notices
 Same Direwolf setup on that machine, then the station client:
 
 ```sh
-ax25irc-station --call YOURCALL-7 --gateway GATEWAY-1 \
+rfirc-station --call YOURCALL-7 --gateway GATEWAY-1 \
     --channel '#rf' --tnc tcp://127.0.0.1:8001
 ```
 
-AppImage: `./ax25ircd.AppImage station --call …`. The nick on IRC is the
+AppImage: `./rfircd.AppImage station --call …`. The nick on IRC is the
 callsign with `-` turned into `|` (`YOURCALL|7`).
 
 ## 10. If nothing comes back
 
-- Direwolf not running, or not on `127.0.0.1:8001` — ax25ircd reconnects, but nothing radiates.
+- Direwolf not running, or not on `127.0.0.1:8001` — rfircd reconnects, but nothing radiates.
 - `Bind failed … Address already in use` on port 8000 — AGW, unused here. Set `AGWPORT 0`. The line that matters is `Ready to accept KISS TCP … on port 8001`.
 - `Could not open audio device … No such file or directory` — card index moved
   (HDMI often occupies `plughw:1,0`). Use `plughw:CARD=Transceiver,DEV=0`.
@@ -260,7 +260,7 @@ callsign with `-` turned into `|` (`YOURCALL|7`).
   duty limit is doing its job; `RADIO DUTY` shows the backlog.
 - "Not put on the air: the transmit queue is Ns deep" — the channel is busier
   than the duty cycle allows. Shorter messages, or fewer of them.
-- Practice with no RF: `ax25irc-kisshub --bind 127.0.0.1:8001` and the same
+- Practice with no RF: `rfirc-kisshub --bind 127.0.0.1:8001` and the same
   toml, indoors. Still do not enable radio toward a real antenna until you
   mean it.
 
@@ -269,14 +269,14 @@ callsign with `-` turned into `|` (`YOURCALL|7`).
 Short answer: no, and it is not close.
 
 Direwolf is not a shim here. Between "an IRC message" and "RF out of a QMX"
-there are four jobs, and ax25ircd deliberately does none of them:
+there are four jobs, and rfircd deliberately does none of them:
 
 | Job | Who does it | What replacing it costs |
 |---|---|---|
 | AFSK/BPSK modulation and **demodulation** | Direwolf | A soundcard modem: filters, timing recovery, DCD, and enough decoder tolerance to work on a real HF channel. This is the hard part, and Direwolf is a decade of it. |
 | ALSA capture and playback | Direwolf | Audio I/O and buffering against xruns |
 | PTT over CAT | Direwolf via hamlib | hamlib bindings or a hand-rolled Kenwood-dialect CAT driver |
-| AX.25 framing and KISS | Direwolf, and ax25ircd | Already done in `src/ax25` |
+| AX.25 framing and KISS | Direwolf, and rfircd | Already done in `src/ax25` |
 
 The QMX itself cannot fill the gap. It is a transceiver with a USB audio
 interface and a CAT port — it has no KISS TNC, and its Digi mode is single-tone
@@ -286,25 +286,25 @@ firmware setting that turns it into a TNC.
 So "skip Direwolf" really means "write a soundmodem". That is a real project —
 DSP, audio plumbing, and a decoder that has to work on a noisy 300 baud HF
 channel where Direwolf's multi-decoder approach earns its keep — and it would
-be a separate binary presenting the same KISS socket ax25ircd already speaks
+be a separate binary presenting the same KISS socket rfircd already speaks
 to. The gateway would not change at all.
 
 If the goal is **fewer moving parts**, the useful options are:
 
-* Run Direwolf as a systemd unit next to ax25ircd, so it is one `systemctl`
+* Run Direwolf as a systemd unit next to rfircd, so it is one `systemctl`
   target rather than a terminal you have to remember. See
   [Packaging](packaging.md).
 * Use `kind = "serial"` with a hardware KISS TNC (Mobilinkd, TNC-Pi) and drop
   Direwolf *and* the sound card — but that is a different radio setup, not a
   QMX one.
 
-If the goal is **no radio at all** for testing, `ax25irc-kisshub` already
+If the goal is **no radio at all** for testing, `rfirc-kisshub` already
 replaces Direwolf completely:
 
 ```sh
-ax25irc-kisshub --bind 127.0.0.1:8001
+rfirc-kisshub --bind 127.0.0.1:8001
 ```
 
-ax25ircd never talks to the QMX. It talks KISS to Direwolf. That split is
+rfircd never talks to the QMX. It talks KISS to Direwolf. That split is
 deliberate: audio, PTT and the modem stay in software that already knows
 hamlib. See [Protocol](protocol.md) and [Design](design.md).

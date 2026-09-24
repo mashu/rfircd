@@ -1,14 +1,14 @@
-# ax25ircd example configuration.
+# rfircd example configuration.
 #
-# Copy to ax25ircd.toml and edit. Check it with:  ax25ircd --check -c ax25ircd.toml
+# Copy to rfircd.toml and edit. Check it with:  rfircd --check -c rfircd.toml
 #
 # READ docs/regulatory.md BEFORE ENABLING THE RADIO SECTION. Running this
 # server with radio.enabled = true makes your station transmit automatically,
 # under your licence, carrying other people's traffic.
 
 [server]
-name = "ax25irc.sk0mt.example"
-network = "AX25IRC"
+name = "rfirc.sk0mt.example"
+network = "RFIRC"
 motd = [
   "SK0MT packet gateway, 144.800 MHz, 1200 baud AFSK",
   "Channels marked +r are transmitted on the air in the clear.",
@@ -40,12 +40,12 @@ max_clients = 256
 # clear.
 # [listen.tls]
 # bind = ["0.0.0.0:6697"]
-# cert = "/etc/ax25ircd/fullchain.pem"
-# key = "/etc/ax25ircd/privkey.pem"
+# cert = "/etc/rfircd/fullchain.pem"
+# key = "/etc/rfircd/privkey.pem"
 
 [logging]
 # Extra copy of tracing output. stderr/journald still get the same lines.
-# file = "ax25ircd.log"
+# file = "rfircd.log"
 # Who connected, claimed a callsign, flooded, kicked, and what went on the air.
 # audit_file = "audit.log"
 
@@ -72,7 +72,7 @@ path = []
 
 # Identification interval in seconds. Must be <= 600.
 id_interval_secs = 540
-id_text = "AX25IRC gateway - IRC over packet"
+id_text = "RFIRC gateway - IRC over RF"
 
 # AX.25 information field limit. 128 gets through a noisy channel far more
 # often than the 256 byte default.
@@ -130,9 +130,14 @@ aprs = true
 # positions/beacons. Empty: messages need the prefix; beacons go to the
 # first +r channel. Must be a configured +r channel if set.
 # aprs_channel = "#rf"
+# How outbound RF chat is encoded. Inbound always accepts both APRS and AIRC.
+# "airc" (default): one AIRC broadcast per line; APRS-only HTs still get an
+# addressed APRS copy. "aprs": APRS messages only (one per RF peer in the
+# channel); no AIRC CQ.
+# rf_mode = "airc"
 
 # External transmit interlock: a command that decides whether it is safe to
-# key up at all. ax25ircd cannot see the radio — it speaks KISS to a modem,
+# key up at all. rfircd cannot see the radio — it speaks KISS to a modem,
 # and KISS carries frames, not SWR readings — so this check is yours to
 # supply. Point it at an SWR meter, a temperature probe on the finals, a GPIO
 # from a hardware interlock, or a file somebody touches before climbing the
@@ -257,5 +262,5 @@ rf = false
 [[opers]]
 name = "sm0abc"
 # Plaintext is accepted only when listen.bind is loopback. On a public
-# address, paste an Argon2id hash from: ax25ircd --hash-password
+# address, paste an Argon2id hash from: rfircd --hash-password
 password = "change-me"

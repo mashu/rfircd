@@ -1,16 +1,16 @@
-//! `ax25irc-kisshub` — a virtual radio channel.
+//! `rfirc-kisshub` — a virtual radio channel.
 //!
 //! Every TCP client that connects is treated as a station on the same
-//! frequency. The implementation is in [`ax25ircd::kisshub`]; this is the
+//! frequency. The implementation is in [`rfircd::kisshub`]; this is the
 //! command line around it.
 //!
 //! ```sh
-//! ax25irc-kisshub --bind 127.0.0.1:8001 &
-//! ax25ircd -c ax25ircd.toml                     # radio.tnc points at 8001
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+//! rfirc-kisshub --bind 127.0.0.1:8001 &
+//! rfircd -c rfircd.toml                     # radio.tnc points at 8001
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
 //! ```
 
-use ax25ircd::kisshub::{self, Invocation};
+use rfircd::kisshub::{self, Invocation};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

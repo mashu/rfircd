@@ -18,18 +18,68 @@
 //! TNC task. This module decides *whether* to hand it something; the governor
 //! decides *when* that something is keyed.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use tracing::{debug, warn};
 
-use crate::airc::{encode_fields, AircFrame, Kind, SessionConfig, Sessions};
+use crate::airc::{encode_fields, AircFrame, Dialect, Kind, SessionConfig, Sessions};
+use crate::aprs::{self, AprsMessage};
 use crate::ax25::{AirtimeShared, Ax25Frame, Class, Keyed, TncHandle};
 use crate::callsign::Callsign;
-use crate::config::Config;
+use crate::config::{Config, RfMode};
 
 use super::mailbox::Mailbox;
+
+/// Outbound APRS chat with stop-and-wait ACK per destination.
+#[derive(Default)]
+struct AprsOutbound {
+    next_id: u32,
+    pending: HashMap<Callsign, AprsInFlight>,
+    waiting: HashMap<Callsign, VecDeque<AprsQueued>>,
+}
+
+struct AprsInFlight {
+    msgid: String,
+    info: Vec<u8>,
+    class: TxClass,
+    attempts: u32,
+    next_retry: Instant,
+}
+
+struct AprsQueued {
+    text: String,
+    class: TxClass,
+}
+
+impl AprsOutbound {
+    fn next_msgid(&mut self) -> String {
+        self.next_id = self.next_id.wrapping_add(1);
+        if self.next_id == 0 {
+            self.next_id = 1;
+        }
+        // 1–5 alphanumeric; base-36 keeps ids short for the 67-char budget.
+        let mut n = self.next_id;
+        let mut s = String::new();
+        for _ in 0..5 {
+            let d = (n % 36) as u8;
+            s.insert(
+                0,
+                if d < 10 {
+                    char::from(b'0' + d)
+                } else {
+                    char::from(b'A' + (d - 10))
+                },
+            );
+            n /= 36;
+            if n == 0 {
+                break;
+            }
+        }
+        s
+    }
+}
 
 /// What a frame is *for*, which decides how much of the transmit backlog it
 /// may occupy.
@@ -117,6 +167,8 @@ pub struct Radio {
     aprs_msgid: HashMap<(Callsign, String), Instant>,
     /// Recent APRS beacon payloads, so a digipeated copy is not a second line.
     aprs_beacon: HashMap<(Callsign, String), Instant>,
+    /// Outbound APRS chat waiting for ACK (one in flight per destination).
+    aprs_out: AprsOutbound,
 }
 
 /// Result of an operator or automatic identification attempt.
@@ -163,6 +215,7 @@ impl Radio {
             keyed_rx,
             aprs_msgid: HashMap::new(),
             aprs_beacon: HashMap::new(),
+            aprs_out: AprsOutbound::default(),
         }
     }
 
@@ -301,8 +354,8 @@ impl Radio {
         );
     }
 
-    /// A raw UI information field (APRS ACK/REJ/reply). `account` is the
-    /// station this transmission is *for*, so their APRS traffic shares a
+    /// A raw UI information field (APRS ACK/REJ/system reply). `account` is
+    /// the station this transmission is *for*, so their APRS traffic shares a
     /// fairness bucket with their AIRC traffic rather than collapsing onto
     /// the `APRS` destination address.
     pub fn transmit_ui(
@@ -313,6 +366,155 @@ impl Radio {
         account: &Callsign,
     ) {
         self.enqueue_ui(dest, info, class, false, &account.to_string());
+    }
+
+    /// Queue an APRS chat line to `to` (msgid + ACK/retry). Body is truncated
+    /// to the APRS text budget. Returns false if the transmitter is unavailable.
+    pub fn enqueue_aprs_chat(
+        &mut self,
+        to: &Callsign,
+        text: &str,
+        class: TxClass,
+        now: Instant,
+    ) -> bool {
+        if !self.available() || self.interlock_down() {
+            return false;
+        }
+        let text: String = text.chars().take(67).collect();
+        if text.is_empty() {
+            return false;
+        }
+        if self.aprs_out.pending.contains_key(to) {
+            let q = self.aprs_out.waiting.entry(to.clone()).or_default();
+            if q.len() >= 8 {
+                self.stats.rf_frames_refused += 1;
+                return false;
+            }
+            q.push_back(AprsQueued { text, class });
+            return true;
+        }
+        self.start_aprs_chat(to, text, class, now)
+    }
+
+    fn start_aprs_chat(
+        &mut self,
+        to: &Callsign,
+        text: String,
+        class: TxClass,
+        now: Instant,
+    ) -> bool {
+        let msgid = self.aprs_out.next_msgid();
+        let info = aprs::message_info(to, &text, &msgid);
+        if !self.backlog_has_room(info.len() + 20, class) {
+            self.stats.rf_frames_refused += 1;
+            return false;
+        }
+        let dest = aprs::ax25_destination();
+        self.transmit_ui(&dest, info.clone(), class, to);
+        let timeout = Duration::from_secs(self.config.radio.ack_timeout_secs.max(1));
+        self.aprs_out.pending.insert(
+            to.clone(),
+            AprsInFlight {
+                msgid,
+                info,
+                class,
+                attempts: 1,
+                next_retry: now + timeout,
+            },
+        );
+        true
+    }
+
+    /// An `ack`/`rej` from `from` addressed to this gateway.
+    pub fn on_aprs_ack(&mut self, from: &Callsign, msg: &AprsMessage, now: Instant) {
+        let Some(id) = aprs::control_msgid(msg) else {
+            return;
+        };
+        let Some(pending) = self.aprs_out.pending.get(from) else {
+            return;
+        };
+        if pending.msgid != id {
+            return;
+        }
+        self.aprs_out.pending.remove(from);
+        let next = self
+            .aprs_out
+            .waiting
+            .get_mut(from)
+            .and_then(|q| q.pop_front());
+        if self
+            .aprs_out
+            .waiting
+            .get(from)
+            .is_some_and(|q| q.is_empty())
+        {
+            self.aprs_out.waiting.remove(from);
+        }
+        if let Some(next) = next {
+            let _ = self.start_aprs_chat(from, next.text, next.class, now);
+        }
+    }
+
+    /// Retransmit unanswered APRS chat; drop after `max_retries`.
+    pub fn tick_aprs(&mut self, now: Instant) {
+        if !self.available() || self.interlock_down() {
+            return;
+        }
+        let max_retries = self.config.radio.max_retries.max(1);
+        let timeout = Duration::from_secs(self.config.radio.ack_timeout_secs.max(1));
+        let due: Vec<Callsign> = self
+            .aprs_out
+            .pending
+            .iter()
+            .filter(|(_, p)| now >= p.next_retry)
+            .map(|(c, _)| c.clone())
+            .collect();
+        for call in due {
+            let Some(mut pending) = self.aprs_out.pending.remove(&call) else {
+                continue;
+            };
+            if pending.attempts >= max_retries {
+                debug!(%call, "APRS chat gave up waiting for ACK");
+                self.stats.rf_frames_dropped += 1;
+                let next = self
+                    .aprs_out
+                    .waiting
+                    .get_mut(&call)
+                    .and_then(|q| q.pop_front());
+                if self
+                    .aprs_out
+                    .waiting
+                    .get(&call)
+                    .is_some_and(|q| q.is_empty())
+                {
+                    self.aprs_out.waiting.remove(&call);
+                }
+                if let Some(next) = next {
+                    let _ = self.start_aprs_chat(&call, next.text, next.class, now);
+                }
+                continue;
+            }
+            pending.attempts += 1;
+            let backoff = timeout.saturating_mul(pending.attempts.min(4));
+            pending.next_retry = now + backoff;
+            let dest = aprs::ax25_destination();
+            self.transmit_ui(&dest, pending.info.clone(), pending.class, &call);
+            self.aprs_out.pending.insert(call, pending);
+        }
+    }
+
+    /// Whether outbound chat to this station should use APRS encoding.
+    pub fn wants_aprs(&self, call: &Callsign) -> bool {
+        if self.config.radio.rf_mode.is_aprs() {
+            return true;
+        }
+        self.sessions
+            .peer(call)
+            .is_some_and(|p| p.dialect == Dialect::Aprs)
+    }
+
+    pub fn rf_mode(&self) -> RfMode {
+        self.config.radio.rf_mode
     }
 
     fn enqueue_ui(
@@ -441,6 +643,31 @@ impl Radio {
                 break;
             };
             let age = m.age(now).as_secs().to_string();
+            if self.wants_aprs(call) {
+                // APRS HTs do not speak STORED; deliver as ordinary chat.
+                let body = if m.from.is_empty() {
+                    m.text.clone()
+                } else {
+                    format!("{}: {}", m.from, m.text)
+                };
+                let body = if m.truncated {
+                    format!("{body}…")
+                } else {
+                    body
+                };
+                let info_len = body.len().min(67) + 20;
+                if !self.backlog_has_room(info_len, TxClass::Direct) {
+                    debug!(%call, "holding mail back: the transmit backlog is full");
+                    break;
+                }
+                if !self.enqueue_aprs_chat(call, &body, TxClass::Direct, now) {
+                    debug!(%call, "holding mail back: the transmitter refused it");
+                    break;
+                }
+                self.mailbox.drop_front(call);
+                sent += 1;
+                continue;
+            }
             let payload = encode_fields(&[&nick, &m.from, &m.text, &age]);
             let flags = if m.truncated {
                 crate::airc::frame::flags::TRUNCATED
@@ -723,6 +950,9 @@ impl Radio {
         let outcome = self.sessions.enqueue(dst, kind, payload, reliable, now);
         if !outcome.accepted {
             return false;
+        }
+        if let Some(peer) = self.sessions.peer_mut(dst) {
+            peer.note_airc();
         }
         for f in outcome.frames {
             self.transmit_direct(dst, f.with_flags(flags), class);

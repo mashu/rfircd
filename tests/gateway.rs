@@ -5,14 +5,14 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use ax25ircd::airc::{encode_fields, flags, AircFrame, Kind};
-use ax25ircd::ax25::kiss::{self, KissDecoder};
-use ax25ircd::ax25::tnc::{self, TncConfig};
-use ax25ircd::ax25::Ax25Frame;
-use ax25ircd::callsign::Callsign;
-use ax25ircd::config::Config;
-use ax25ircd::server::state::ClientId;
-use ax25ircd::server::{Event, Server};
+use rfircd::airc::{encode_fields, flags, AircFrame, Kind};
+use rfircd::ax25::kiss::{self, KissDecoder};
+use rfircd::ax25::tnc::{self, TncConfig};
+use rfircd::ax25::Ax25Frame;
+use rfircd::callsign::Callsign;
+use rfircd::config::Config;
+use rfircd::server::state::ClientId;
+use rfircd::server::{Event, Server};
 use tokio::io::{AsyncReadExt, AsyncWriteExt, DuplexStream};
 use tokio::sync::mpsc;
 
@@ -818,7 +818,7 @@ async fn a_second_gateways_downlink_does_not_start_a_loop() {
     let mut h = Harness::new().await;
     h.drain_client();
 
-    // Exactly what another ax25ircd on the same frequency puts on the air:
+    // Exactly what another rfircd on the same frequency puts on the air:
     // a downlink MSG, [channel, from, text], addressed to AIRC. Read as an
     // uplink it would look like a message from SK0AA-1 to "#rf" saying
     // "bob" — which we would then relay and transmit, and so would they.
@@ -1475,7 +1475,7 @@ async fn a_config_using_the_old_txdelay_key_is_told_where_it_went() {
 async fn the_station_client_shares_the_gateways_airtime_limits() {
     // The station is a human typing rather than an automatic service, but it
     // is the same QRP radio at the same baud rate, so the same check applies.
-    use ax25ircd::ax25::AirtimeConfig;
+    use rfircd::ax25::AirtimeConfig;
     let bad = AirtimeConfig {
         max_continuous: Duration::from_secs(60),
         cooldown: Duration::from_secs(5),

@@ -1,4 +1,4 @@
-//! Command line and startup wiring for the `ax25ircd` binary.
+//! Command line and startup wiring for the `rfircd` binary.
 //!
 //! Separated from `main` so it can be tested: argument handling and the
 //! configuration-to-TNC-link step are exactly the parts where a mistake means
@@ -40,18 +40,18 @@ pub enum Invocation {
     Usage(String),
 }
 
-pub const DEFAULT_CONFIG: &str = "ax25ircd.toml";
+pub const DEFAULT_CONFIG: &str = "rfircd.toml";
 
 pub fn version() -> String {
-    format!("ax25ircd {}", env!("CARGO_PKG_VERSION"))
+    format!("rfircd {}", env!("CARGO_PKG_VERSION"))
 }
 
 pub fn help() -> String {
     format!(
         "\
-ax25ircd {} — IRC server with an AX.25 packet-radio gateway
+rfircd {} — IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS)
 
-Usage: ax25ircd [--config path] [--check] [--init] [--hash-password]
+Usage: rfircd [--config path] [--check] [--init] [--hash-password]
 
   -c, --config <path>   configuration file (default: {DEFAULT_CONFIG})
       --check           validate the configuration and exit
@@ -63,7 +63,7 @@ Usage: ax25ircd [--config path] [--check] [--init] [--hash-password]
   -V, --version         print version
   -h, --help            this help
 
-QMX on Debian: https://mashu.github.io/ax25ircd/
+QMX on Debian: https://mashu.github.io/rfircd/
 ",
         env!("CARGO_PKG_VERSION")
     )
@@ -296,9 +296,9 @@ mod tests {
             }
         );
         assert_eq!(
-            parse_args(args(&["-c", "/etc/ax25ircd.toml"])),
+            parse_args(args(&["-c", "/etc/rfircd.toml"])),
             Invocation::Run {
-                path: "/etc/ax25ircd.toml".into()
+                path: "/etc/rfircd.toml".into()
             }
         );
         assert_eq!(
@@ -328,9 +328,9 @@ mod tests {
             }
         );
         assert_eq!(
-            parse_args(args(&["--init", "-c", "/etc/ax25ircd/ax25ircd.toml"])),
+            parse_args(args(&["--init", "-c", "/etc/rfircd/rfircd.toml"])),
             Invocation::Init {
-                path: "/etc/ax25ircd/ax25ircd.toml".into()
+                path: "/etc/rfircd/rfircd.toml".into()
             }
         );
         // There is nothing to check before the file exists, so the pair is
@@ -515,7 +515,7 @@ rf = true
 
     #[test]
     fn help_and_version_say_what_they_should() {
-        assert!(version().starts_with("ax25ircd "));
+        assert!(version().starts_with("rfircd "));
         let h = help();
         assert!(
             h.contains("--check") && h.contains("--hash-password") && h.contains(DEFAULT_CONFIG)

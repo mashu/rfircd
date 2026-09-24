@@ -1,10 +1,10 @@
 #!/bin/sh
 # AppImage entry: default is the gateway. Subcommands select the other binaries.
-#   ./ax25ircd-x86_64.AppImage -c ~/.config/ax25ircd/ax25ircd.toml
-#   ./ax25ircd-x86_64.AppImage station --call SM0ABC-7 --gateway SK0MT-1
-#   ./ax25ircd-x86_64.AppImage kisshub --bind 127.0.0.1:8001
+#   ./rfircd-x86_64.AppImage -c ~/.config/rfircd/rfircd.toml
+#   ./rfircd-x86_64.AppImage station --call SM0ABC-7 --gateway SK0MT-1
+#   ./rfircd-x86_64.AppImage kisshub --bind 127.0.0.1:8001
 #
-# If you symlink the AppImage to ax25irc-station or ax25irc-kisshub, argv0
+# If you symlink the AppImage to rfirc-station or rfirc-kisshub, argv0
 # selects that binary instead.
 
 set -eu
@@ -14,14 +14,14 @@ BIN="$HERE/usr/bin"
 
 wrapper_help() {
     cat <<'EOF'
-ax25ircd AppImage — IRC server with an AX.25 packet-radio gateway
+rfircd AppImage — IRC server with an RF gateway (KISS/Direwolf)
 
-  ./ax25ircd-*.AppImage [ax25ircd options]
-  ./ax25ircd-*.AppImage station  --call CALL --gateway CALL [options]
-  ./ax25ircd-*.AppImage kisshub  [--bind 127.0.0.1:8001] [--quiet]
-  ./ax25ircd-*.AppImage gateway  [ax25ircd options]
+  ./rfircd-*.AppImage [rfircd options]
+  ./rfircd-*.AppImage station  --call CALL --gateway CALL [options]
+  ./rfircd-*.AppImage kisshub  [--bind 127.0.0.1:8001] [--quiet]
+  ./rfircd-*.AppImage gateway  [rfircd options]
 
-QMX on Debian: https://mashu.github.io/ax25ircd/
+QMX on Debian: https://mashu.github.io/rfircd/
 EOF
 }
 
@@ -29,8 +29,8 @@ name=$(basename "${ARGV0:-$0}" .AppImage)
 name=${name%.appimage}
 
 case "$name" in
-    ax25irc-station*) exec "$BIN/ax25irc-station" "$@" ;;
-    ax25irc-kisshub*) exec "$BIN/ax25irc-kisshub" "$@" ;;
+    rfirc-station*) exec "$BIN/rfirc-station" "$@" ;;
+    rfirc-kisshub*) exec "$BIN/rfirc-kisshub" "$@" ;;
 esac
 
 if [ "${1:-}" = "--appimage-help" ] || [ "${1:-}" = "--wrapper-help" ]; then
@@ -39,24 +39,24 @@ if [ "${1:-}" = "--appimage-help" ] || [ "${1:-}" = "--wrapper-help" ]; then
 fi
 
 case "${1:-}" in
-    station|ax25irc-station)
+    station|rfirc-station)
         shift
-        exec "$BIN/ax25irc-station" "$@"
+        exec "$BIN/rfirc-station" "$@"
         ;;
-    kisshub|ax25irc-kisshub)
+    kisshub|rfirc-kisshub)
         shift
-        exec "$BIN/ax25irc-kisshub" "$@"
+        exec "$BIN/rfirc-kisshub" "$@"
         ;;
-    gateway|ax25ircd)
+    gateway|rfircd)
         shift
-        exec "$BIN/ax25ircd" "$@"
+        exec "$BIN/rfircd" "$@"
         ;;
     -h|--help)
         wrapper_help
         echo
-        exec "$BIN/ax25ircd" --help
+        exec "$BIN/rfircd" --help
         ;;
     *)
-        exec "$BIN/ax25ircd" "$@"
+        exec "$BIN/rfircd" "$@"
         ;;
 esac

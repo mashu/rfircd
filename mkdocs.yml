@@ -1,16 +1,16 @@
-site_name: ax25ircd
-site_url: https://mashu.github.io/ax25ircd/
-site_description: IRC server with an AX.25 packet-radio gateway
-repo_url: https://github.com/mashu/ax25ircd
-repo_name: mashu/ax25ircd
+site_name: rfircd
+site_url: https://mashu.github.io/rfircd/
+site_description: IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS)
+repo_url: https://github.com/mashu/rfircd
+repo_name: mashu/rfircd
 edit_uri: edit/main/docs/
 copyright: MIT. You are the licensee.
 
 theme:
   name: material
   language: en
-  logo: assets/ax25ircd.svg
-  favicon: assets/ax25ircd.svg
+  logo: assets/rfircd.svg
+  favicon: assets/rfircd.svg
   font: false
   palette:
     scheme: slate
@@ -32,7 +32,7 @@ extra:
     alias: true
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/mashu/ax25ircd
+      link: https://github.com/mashu/rfircd
 
 extra_css:
   - stylesheets/extra.css

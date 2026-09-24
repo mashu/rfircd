@@ -529,7 +529,7 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        std::env::temp_dir().join(format!("ax25ircd-nicks-{n}.json"))
+        std::env::temp_dir().join(format!("rfircd-nicks-{n}.json"))
     }
 
     /// Exercise the same path the server uses: hash off the event loop,

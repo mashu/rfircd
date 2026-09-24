@@ -55,7 +55,7 @@ impl Server {
     }
 
     pub(super) fn cmd_version(&mut self, uid: &UserId) {
-        let ver = format!("ax25ircd-{}", env!("CARGO_PKG_VERSION"));
+        let ver = format!("rfircd-{}", env!("CARGO_PKG_VERSION"));
         let server = self.server_name().to_string();
         self.numeric(
             uid,
@@ -97,14 +97,14 @@ impl Server {
     pub(super) fn cmd_info(&mut self, uid: &UserId) {
         for line in [
             concat!(
-                "ax25ircd ",
+                "rfircd ",
                 env!("CARGO_PKG_VERSION"),
                 " — IRC server with an AX.25 gateway"
             ),
             "Single server; no linking, no services, no DCC, no on-air encryption.",
             "The air is an allowlist: PRIVMSG chat and /me, plus TOPIC. Anything",
             "not named stays on IRC — a new event type does not transmit until listed.",
-            "https://github.com/mashu/ax25ircd",
+            "https://github.com/mashu/rfircd",
         ] {
             self.numeric(uid, num::RPL_INFO, &[line]);
         }
@@ -116,10 +116,11 @@ impl Server {
         self.numeric(uid, num::RPL_HELPSTART, &[&topic, "Help"]);
         let body: &[&str] = match topic.as_str() {
             "air" | "radio" | "rf" => &[
-                "Allowlist: PRIVMSG chat and /me, plus TOPIC (same RF-TX gate).",
-                "JOIN/PART only if presence_notices is on. APRS messages to the",
-                "gateway callsign are ACKed and may enter a +r channel. APRS",
-                "positions and status beacons are shown on IRC, never retransmitted.",
+                "Allowlist: PRIVMSG chat and /me, plus TOPIC (AIRC mode only).",
+                "JOIN/PART only if presence_notices is on (AIRC). APRS messages",
+                "to the gateway enter a +r channel or query a nick. Replies and",
+                "channel chat reach APRS HTs as addressed APRS when needed.",
+                "positions/status beacons are IRC NOTICE only, never retransmitted.",
                 "NOTICE, CTCP, MODE, KICK, numerics stay on IRC until listed.",
             ],
             _ => &[
@@ -166,7 +167,7 @@ impl Server {
         self.numeric(
             uid,
             num::RPL_LINKS,
-            &[&server, &server, "0 ax25ircd (no server linking)"],
+            &[&server, &server, "0 rfircd (no server linking)"],
         );
         self.numeric(uid, num::RPL_ENDOFLINKS, &["*", "End of /LINKS list"]);
     }

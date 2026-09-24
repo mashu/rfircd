@@ -15,9 +15,9 @@ site is how you switch.
 ```sh
 cargo build --release
 ./packaging/linux/build-dist.sh
-# dist/ax25ircd-<arch>.AppImage
-# dist/ax25ircd-<arch>.run
-# dist/ax25ircd-<arch>-linux.tar.gz
+# dist/rfircd-<arch>.AppImage
+# dist/rfircd-<arch>.run
+# dist/rfircd-<arch>-linux.tar.gz
 ```
 
 Musl (what CI uses):
@@ -30,6 +30,6 @@ cargo zigbuild --release --target x86_64-unknown-linux-musl
 
 ## systemd
 
-`packaging/ax25ircd.service` — SIGINT on stop so the station can identify
+`packaging/rfircd.service` — SIGINT on stop so the station can identify
 before it goes silent. The `.run` installer drops a user unit under
 `~/.config/systemd/user/` or a system unit with `--system`.

@@ -85,6 +85,19 @@ struct OwedAck {
     bitmap: Option<Vec<u8>>,
 }
 
+/// Which application protocol a station has been speaking on the air.
+///
+/// New peers default to [`Dialect::Aprs`] until they send AIRC; an AIRC
+/// `HELLO` (or any AIRC frame) upgrades them to [`Dialect::Airc`] for the
+/// rest of the peer lifetime. Used so a bridged channel can fan out public
+/// chat as addressed APRS to stock HTs without forcing the whole gateway
+/// into APRS mode.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum Dialect {
+    Aprs,
+    Airc,
+}
+
 /// One station heard on the air.
 pub struct Peer {
     pub call: Callsign,
@@ -95,6 +108,8 @@ pub struct Peer {
     pub registered: bool,
     /// Frames dropped for this peer, for `RADIO HEARD`.
     pub dropped: u64,
+    /// Last application dialect observed from this station.
+    pub dialect: Dialect,
     pending: Option<Pending>,
     owed_ack: Option<OwedAck>,
     queue: VecDeque<Vec<AircFrame>>,
@@ -117,6 +132,7 @@ impl Peer {
             last_heard: now,
             registered: false,
             dropped: 0,
+            dialect: Dialect::Aprs,
             pending: None,
             owed_ack: None,
             queue: VecDeque::new(),
@@ -124,6 +140,18 @@ impl Peer {
             reasm: HashMap::new(),
             kicked: HashSet::new(),
             epoch: 0,
+        }
+    }
+
+    /// Sticky upgrade: once a station speaks AIRC it stays AIRC.
+    pub fn note_airc(&mut self) {
+        self.dialect = Dialect::Airc;
+    }
+
+    /// Mark as APRS unless it has already spoken AIRC.
+    pub fn note_aprs(&mut self) {
+        if self.dialect != Dialect::Airc {
+            self.dialect = Dialect::Aprs;
         }
     }
 
@@ -315,6 +343,7 @@ impl Sessions {
         let Some(peer) = self.touch(src, now) else {
             return RxOutcome::default();
         };
+        peer.note_airc();
         let mut out = RxOutcome::default();
 
         if frame.kind == Kind::Hello {

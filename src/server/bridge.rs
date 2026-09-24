@@ -175,6 +175,7 @@ impl Server {
             return;
         }
         if msg.is_ack_or_rej() {
+            self.radio.on_aprs_ack(src, &msg, now);
             return;
         }
         if !self.policy.rf_station_rate_ok(src, now) {
@@ -195,6 +196,9 @@ impl Server {
         if self.radio.sessions.touch(src, now).is_none() {
             self.aprs_ack(src, &msg);
             return;
+        }
+        if let Some(peer) = self.radio.sessions.peer_mut(src) {
+            peer.note_aprs();
         }
 
         let duplicate = msg
@@ -224,6 +228,39 @@ impl Server {
             };
             self.aprs_reply(src, hint);
             return;
+        }
+
+        // `nick text` → IRC query when that nick is online (aprsmsg-like).
+        if let Some((first, rest)) = text.split_once(' ') {
+            if !is_channel_name(first) {
+                if let Some(target) = self.state.by_nick(first).cloned() {
+                    let body = sanitize(rest.trim());
+                    if body.is_empty() {
+                        self.aprs_ack(src, &msg);
+                        self.aprs_reply(src, "send nick text");
+                        return;
+                    }
+                    if self.ensure_rf_user(src) {
+                        self.radio.flush_mailbox(src);
+                    }
+                    let Some(user) = self.state.user(&UserId::Rf(src.clone())).cloned() else {
+                        self.aprs_ack(src, &msg);
+                        return;
+                    };
+                    let d = Delivery::Privmsg {
+                        from_nick: user.nick.clone(),
+                        from_prefix: user.prefix(),
+                        target: target.nick.clone(),
+                        text: body,
+                        notice: false,
+                        truncated: false,
+                    };
+                    self.deliver(&target.id, &d);
+                    self.aprs_ack(src, &msg);
+                    info!(%src, to = %target.nick, "APRS private message");
+                    return;
+                }
+            }
         }
 
         let default = self.config.radio.aprs_channel.clone();
@@ -269,23 +306,43 @@ impl Server {
             return;
         };
         let uid = user.id.clone();
-        let other_rf = self
+        let airc_others: Vec<Callsign> = self
             .state
             .channel(&display)
-            .map(|c| c.members.keys().any(|m| m.is_rf() && *m != uid))
-            .unwrap_or(false);
+            .map(|c| {
+                c.members
+                    .keys()
+                    .filter_map(|m| match m {
+                        UserId::Rf(call) if *m != uid => {
+                            if self
+                                .radio
+                                .sessions
+                                .peer(call)
+                                .map(|p| p.dialect == crate::airc::Dialect::Airc)
+                                .unwrap_or(false)
+                            {
+                                Some(call.clone())
+                            } else {
+                                None
+                            }
+                        }
+                        _ => None,
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
 
         let mut air_text = body.to_string();
         let mut truncated = false;
-        let mut to_air = other_rf;
-        if to_air {
+        let mut to_airc = !airc_others.is_empty();
+        if to_airc {
             match self.policy.screen_outbound(&air_text) {
                 Verdict::Allow(t) => air_text = t,
                 Verdict::Truncated(t) => {
                     air_text = t;
                     truncated = true;
                 }
-                Verdict::Deny(_) => to_air = false,
+                Verdict::Deny(_) => to_airc = false,
             }
         }
 
@@ -293,11 +350,27 @@ impl Server {
             from_nick: user.nick.clone(),
             from_prefix: user.prefix(),
             target: display.clone(),
-            text: if to_air { air_text } else { body.to_string() },
+            text: if to_airc {
+                air_text.clone()
+            } else {
+                body.to_string()
+            },
             notice: false,
             truncated,
         };
-        self.broadcast_channel_ex(&display, &d, Some(&uid), to_air);
+        // IRC only here: every station in range already heard the APRS frame.
+        // AIRC peers did not, so translate once as AIRC when any are present.
+        self.broadcast_channel_ex(&display, &d, Some(&uid), false);
+        if to_airc {
+            let payload = encode_fields(&[&display, &user.nick, &air_text]);
+            let flags = if truncated {
+                crate::airc::frame::flags::TRUNCATED
+            } else {
+                0
+            };
+            self.radio
+                .broadcast_flagged(Kind::Msg, payload, TxClass::Chat, flags);
+        }
         self.aprs_ack(src, &msg);
         info!(%src, "APRS message into channel");
     }

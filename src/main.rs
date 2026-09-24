@@ -1,13 +1,13 @@
-//! ax25ircd - IRC server with an AX.25 packet radio gateway.
+//! rfircd - IRC server with an AX.25 packet radio gateway.
 //!
-//! Usage: `ax25ircd [--config path] [--check] [--hash-password]`
+//! Usage: `rfircd [--config path] [--check] [--hash-password]`
 
 use std::fs::OpenOptions;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-use ax25ircd::cli;
-use ax25ircd::config::Config;
+use rfircd::cli;
+use rfircd::config::Config;
 use tracing::info;
 use tracing_subscriber::prelude::*;
 
@@ -16,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
     let (path, check_only) = match cli::parse_args(std::env::args().skip(1)) {
         cli::Invocation::Run { path } => (path, false),
         cli::Invocation::Check { path } => (path, true),
-        cli::Invocation::Init { path } => return ax25ircd::wizard::run(&path),
+        cli::Invocation::Init { path } => return rfircd::wizard::run(&path),
         cli::Invocation::HashPassword => {
             use std::io::Read;
             let mut password = String::new();
@@ -27,7 +27,7 @@ async fn main() -> anyhow::Result<()> {
             }
             println!(
                 "{}",
-                ax25ircd::accounts::hash_password(password)
+                rfircd::accounts::hash_password(password)
                     .map_err(|_| anyhow::anyhow!("could not hash password"))?
             );
             return Ok(());
@@ -53,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| "ax25ircd=info".into());
+        .unwrap_or_else(|_| "rfircd=info".into());
     let stdout = tracing_subscriber::fmt::layer();
     if let Some(log_path) = &config.logging.file {
         let file = OpenOptions::new()

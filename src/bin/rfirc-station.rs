@@ -1,22 +1,22 @@
-//! `ax25irc-station` — the client side of the gateway, for an operator with a
+//! `rfirc-station` — the client side of the gateway, for an operator with a
 //! radio and a TNC.
 //!
 //! It speaks AIRC/1 (see `docs/protocol.md`) over KISS and presents a plain
 //! line-oriented interface, so it works over ssh, on a Pi with no screen, or
-//! piped into anything else. The implementation is in [`ax25ircd::station`];
+//! piped into anything else. The implementation is in [`rfircd::station`];
 //! this is the command line and the terminal around it.
 //!
 //! ```sh
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc tcp://192.168.1.10:8001
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc serial:/dev/ttyUSB0@9600
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc tcp://192.168.1.10:8001
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc serial:/dev/ttyUSB0@9600
 //! ```
 
 use std::time::{Duration, Instant};
 
-use ax25ircd::airc::{encode_fields, Kind, SessionConfig, Sessions};
-use ax25ircd::ax25::tnc::{self, TncConfig};
-use ax25ircd::station::{self, Invocation, Station};
+use rfircd::airc::{encode_fields, Kind, SessionConfig, Sessions};
+use rfircd::ax25::tnc::{self, TncConfig};
+use rfircd::station::{self, Invocation, Station};
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 #[tokio::main]

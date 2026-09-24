@@ -5,9 +5,9 @@
 //! piped into anything else.
 //!
 //! ```sh
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc tcp://192.168.1.10:8001
-//! ax25irc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc serial:/dev/ttyUSB0@9600
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --channel '#rf'
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc tcp://192.168.1.10:8001
+//! rfirc-station --call SM0ABC-7 --gateway SK0MT-1 --tnc serial:/dev/ttyUSB0@9600
 //! ```
 //!
 //! Commands: `/join #chan`, `/part #chan`, `/names [#chan]`, `/msg <nick> …`,
@@ -47,7 +47,7 @@ pub enum Invocation {
 
 pub fn usage() -> String {
     String::from(
-        "usage: ax25irc-station --call <CALL-SSID> --gateway <CALL-SSID> [options]
+        "usage: rfirc-station --call <CALL-SSID> --gateway <CALL-SSID> [options]
 
 options:
   --tnc <spec>        tcp://host:port (default tcp://127.0.0.1:8001)
@@ -318,7 +318,7 @@ impl Station {
         let epoch = format!("{:04X}", self.epoch);
         self.send(
             Kind::Hello,
-            encode_fields(&["ax25irc-station/1", &epoch]),
+            encode_fields(&["rfirc-station/1", &epoch]),
             true,
         );
         self.last_hello = Instant::now();

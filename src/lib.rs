@@ -1,4 +1,5 @@
-//! `ax25ircd` - an IRC server that is also an AX.25 packet radio gateway.
+//! `rfircd` — an IRC server with an RF gateway over KISS (Direwolf or any
+//! KISS TNC). Speaks AIRC on the air and interops with stock APRS radios.
 //!
 //! Layering, from the antenna up:
 //!

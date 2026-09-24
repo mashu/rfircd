@@ -60,7 +60,7 @@ jobs:
       - name: Checksums
         run: |
           cd dist
-          sha256sum ax25ircd-* > SHA256SUMS-${{ matrix.arch }}.txt
+          sha256sum rfircd-* > SHA256SUMS-${{ matrix.arch }}.txt
       - uses: actions/upload-artifact@v7
         with:
           name: linux-${{ matrix.arch }}
@@ -91,9 +91,9 @@ jobs:
 
             | File | What |
             |---|---|
-            | `ax25ircd-x86_64.AppImage` | all three tools in one file; `chmod +x` and run |
-            | `ax25ircd-x86_64.run` | self-extracting installer (`~/.local` or `sudo … --system`) |
-            | `ax25ircd-x86_64-linux.tar.gz` | binaries + `install.sh` |
-            | `ax25ircd-aarch64-linux.tar.gz` / `.run` | 64-bit ARM (Pi, etc.) |
+            | `rfircd-x86_64.AppImage` | all three tools in one file; `chmod +x` and run |
+            | `rfircd-x86_64.run` | self-extracting installer (`~/.local` or `sudo … --system`) |
+            | `rfircd-x86_64-linux.tar.gz` | binaries + `install.sh` |
+            | `rfircd-aarch64-linux.tar.gz` / `.run` | 64-bit ARM (Pi, etc.) |
 
-            QMX on Debian: https://mashu.github.io/ax25ircd/stable/qmx/
+            QMX on Debian: https://mashu.github.io/rfircd/stable/qmx/

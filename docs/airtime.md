@@ -5,7 +5,7 @@ when the IRC side gets busy at two in the morning, and the two things it can
 damage — the transmitter's finals and the shared channel — are both slow
 enough that you find out afterwards.
 
-ax25ircd has two separate mechanisms for this, and they are easy to confuse.
+rfircd has two separate mechanisms for this, and they are easy to confuse.
 
 | | `[policy]` | `[radio.duty]` |
 |---|---|---|
@@ -228,7 +228,7 @@ Two starting points:
     hourly_airtime_secs = 1800
     ```
 
-`ax25ircd --check` refuses a configuration where a full-length frame is longer
+`rfircd --check` refuses a configuration where a full-length frame is longer
 than the whole duty allowance — otherwise nothing would ever be transmitted and
 you would be left guessing why. It also refuses a `baud` that is not 300, 1200
 or 9600 unless `allow_nonstandard_baud = true`: a 1200-baud governor in front
@@ -258,7 +258,7 @@ length, the third counts seconds and knows nothing about who is talking, and
 the fourth is the only one that knows what the transmitter has actually been
 doing.
 
-The station client (`ax25irc-station`) runs the same governor with the same
+The station client (`rfirc-station`) runs the same governor with the same
 ceiling — see [Station](station.md).
 
 ## Watching it
@@ -283,7 +283,7 @@ governor's next free slot.
 the full breakdown is control-operator only.
 
 Each frame that actually keys is also written to the audit log (and to
-`ax25ircd::audit` at info) at the moment it is handed to the TNC:
+`rfircd::audit` at info) at the moment it is handed to the TNC:
 
 ```
 rf_tx dest=SA0KAM kind=Welcome bytes=88 class=control keyed=3.3s duty=1.2%
@@ -331,7 +331,7 @@ released.
 
 ## When it is not safe to transmit at all
 
-ax25ircd cannot see your radio. It speaks KISS to a modem, and KISS carries
+rfircd cannot see your radio. It speaks KISS to a modem, and KISS carries
 frames, not telemetry — there is no SWR reading, no PA temperature and no power
 meter anywhere in that path. On a QMX the one port that could answer (CAT) is
 already held by Direwolf for PTT, and two processes cannot share a serial port.
@@ -391,7 +391,7 @@ difference between them is the sign-off ID. `RADIO OFF` lets it through —
 that is the point of it — and a failing interlock does not.
 
 If you need something more forceful than that, stop the process: with
-`panic = "abort"` and no PTT of its own, ax25ircd cannot leave the radio keyed.
+`panic = "abort"` and no PTT of its own, rfircd cannot leave the radio keyed.
 PTT belongs to Direwolf, and Direwolf drops it when its client goes away.
 
 !!! warning "`enabled = false`"

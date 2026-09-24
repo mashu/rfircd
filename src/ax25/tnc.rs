@@ -325,7 +325,7 @@ fn audit_keyed(audit: &Audit, item: &Queued<Ax25Frame>, bytes: usize, keyed: Dur
 
 /// Start the TNC task. Received frames are delivered on the returned channel.
 ///
-/// Keyed frames still reach `tracing` (`ax25ircd::audit`); pass
+/// Keyed frames still reach `tracing` (`rfircd::audit`); pass
 /// [`spawn_with_audit`] when they should also hit the on-disk trail.
 pub fn spawn(config: TncConfig) -> (TncHandle, mpsc::Receiver<Ax25Frame>) {
     spawn_with_audit(config, Audit::open(None))

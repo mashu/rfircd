@@ -69,7 +69,7 @@ pub enum Invocation {
     Usage(String),
 }
 
-pub const USAGE: &str = "usage: ax25irc-kisshub [--bind 127.0.0.1:8001] [--quiet]";
+pub const USAGE: &str = "usage: rfirc-kisshub [--bind 127.0.0.1:8001] [--quiet]";
 
 pub fn parse_args<I: IntoIterator<Item = String>>(args: I) -> Invocation {
     let mut opts = Options::default();

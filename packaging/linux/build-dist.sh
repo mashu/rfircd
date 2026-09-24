@@ -9,9 +9,9 @@
 #   ./packaging/linux/build-dist.sh --bin-dir target/x86_64-unknown-linux-musl/release --arch x86_64
 #
 # Writes into dist/:
-#   ax25ircd-<arch>-linux.tar.gz
-#   ax25ircd-<arch>.run
-#   ax25ircd-<arch>.AppImage   (x86_64 only unless --appimagetool is set)
+#   rfircd-<arch>-linux.tar.gz
+#   rfircd-<arch>.run
+#   rfircd-<arch>.AppImage   (x86_64 only unless --appimagetool is set)
 
 set -eu
 
@@ -52,7 +52,7 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-for b in ax25ircd ax25irc-station ax25irc-kisshub; do
+for b in rfircd rfirc-station rfirc-kisshub; do
     if [ ! -x "$BIN_DIR/$b" ]; then
         echo "missing executable: $BIN_DIR/$b" >&2
         echo "build first: cargo build --release" >&2
@@ -64,11 +64,11 @@ mkdir -p "$OUT"
 STAGING=$(mktemp -d)
 trap 'rm -rf "$STAGING"' EXIT
 
-PKG="ax25ircd-${VERSION}-linux-${ARCH}"
+PKG="rfircd-${VERSION}-linux-${ARCH}"
 PKGDIR="$STAGING/$PKG"
 mkdir -p "$PKGDIR/bin" "$PKGDIR/share/doc"
 
-for b in ax25ircd ax25irc-station ax25irc-kisshub; do
+for b in rfircd rfirc-station rfirc-kisshub; do
     cp "$BIN_DIR/$b" "$PKGDIR/bin/$b"
     chmod 0755 "$PKGDIR/bin/$b"
     if command -v strip >/dev/null 2>&1; then
@@ -76,27 +76,27 @@ for b in ax25ircd ax25irc-station ax25irc-kisshub; do
     fi
 done
 
-cp ax25ircd.example.toml "$PKGDIR/share/ax25ircd.example.toml"
-cp packaging/ax25ircd.service "$PKGDIR/share/ax25ircd.service"
+cp rfircd.example.toml "$PKGDIR/share/rfircd.example.toml"
+cp packaging/rfircd.service "$PKGDIR/share/rfircd.service"
 cp docs/quickstart.md docs/regulatory.md docs/design.md docs/protocol.md LICENSE README.md \
     "$PKGDIR/share/doc/"
 cp packaging/linux/install.sh "$PKGDIR/install.sh"
 chmod 0755 "$PKGDIR/install.sh"
 
-TAR="$OUT/ax25ircd-${ARCH}-linux.tar.gz"
+TAR="$OUT/rfircd-${ARCH}-linux.tar.gz"
 tar -C "$STAGING" -czf "$TAR" "$PKG"
 echo "wrote $TAR"
 
 # --- .run self-extractor ----------------------------------------------------
-RUN="$OUT/ax25ircd-${ARCH}.run"
+RUN="$OUT/rfircd-${ARCH}.run"
 {
     cat <<'HEADER'
 #!/bin/sh
-# ax25ircd self-extracting installer. Does not overwrite an existing config.
+# rfircd self-extracting installer. Does not overwrite an existing config.
 set -eu
 usage() {
     cat <<'EOF'
-Usage: ax25ircd-*.run [--prefix DIR] [--system] [--extract DIR]
+Usage: rfircd-*.run [--prefix DIR] [--system] [--extract DIR]
 
   --prefix DIR   install root (default: $HOME/.local)
   --system       install to /usr/local (needs root)
@@ -177,29 +177,29 @@ if [ -z "$APPIMAGETOOL" ]; then
 fi
 
 APPDIR="$STAGING/AppDir"
-mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/ax25ircd" "$APPDIR/usr/share/doc/ax25ircd" \
+mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/rfircd" "$APPDIR/usr/share/doc/rfircd" \
     "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 
 cp "$PKGDIR/bin/"* "$APPDIR/usr/bin/"
-cp ax25ircd.example.toml "$APPDIR/usr/share/ax25ircd/"
-cp packaging/ax25ircd.service "$APPDIR/usr/share/ax25ircd/"
-cp docs/quickstart.md docs/regulatory.md LICENSE "$APPDIR/usr/share/doc/ax25ircd/"
+cp rfircd.example.toml "$APPDIR/usr/share/rfircd/"
+cp packaging/rfircd.service "$APPDIR/usr/share/rfircd/"
+cp docs/quickstart.md docs/regulatory.md LICENSE "$APPDIR/usr/share/doc/rfircd/"
 cp packaging/linux/AppRun "$APPDIR/AppRun"
 chmod 0755 "$APPDIR/AppRun"
-cp packaging/linux/ax25ircd.desktop "$APPDIR/ax25ircd.desktop"
+cp packaging/linux/rfircd.desktop "$APPDIR/rfircd.desktop"
 
-ICON_PNG="$ROOT/packaging/linux/ax25ircd.png"
+ICON_PNG="$ROOT/packaging/linux/rfircd.png"
 if [ ! -f "$ICON_PNG" ]; then
     echo "missing $ICON_PNG" >&2
     exit 1
 fi
-cp "$ICON_PNG" "$APPDIR/ax25ircd.png"
-cp "$ICON_PNG" "$APPDIR/usr/share/icons/hicolor/256x256/apps/ax25ircd.png"
+cp "$ICON_PNG" "$APPDIR/rfircd.png"
+cp "$ICON_PNG" "$APPDIR/usr/share/icons/hicolor/256x256/apps/rfircd.png"
 
 # GitHub-hosted runners (and many containers) have no FUSE.
 export APPIMAGE_EXTRACT_AND_RUN=1
 export ARCH
-APPIMAGE_OUT="$OUT/ax25ircd-${ARCH}.AppImage"
+APPIMAGE_OUT="$OUT/rfircd-${ARCH}.AppImage"
 rm -f "$APPIMAGE_OUT"
 "$APPIMAGETOOL" --no-appstream "$APPDIR" "$APPIMAGE_OUT"
 chmod 0755 "$APPIMAGE_OUT"

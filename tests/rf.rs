@@ -9,13 +9,13 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use ax25ircd::airc::{encode_fields, AircFrame, Kind};
-use ax25ircd::ax25::tnc::{self, TncConfig};
-use ax25ircd::ax25::Ax25Frame;
-use ax25ircd::callsign::Callsign;
-use ax25ircd::config::Config;
-use ax25ircd::server::state::{ClientId, UserId};
-use ax25ircd::server::{Event, Server};
+use rfircd::airc::{encode_fields, AircFrame, Kind};
+use rfircd::ax25::tnc::{self, TncConfig};
+use rfircd::ax25::Ax25Frame;
+use rfircd::callsign::Callsign;
+use rfircd::config::Config;
+use rfircd::server::state::{ClientId, UserId};
+use rfircd::server::{Event, Server};
 use tokio::sync::mpsc;
 
 const CONFIG: &str = r##"
@@ -82,7 +82,7 @@ struct Rf {
     /// path that asks "can we radiate?".
     _far: tokio::io::DuplexStream,
     _rf_rx: mpsc::Receiver<Ax25Frame>,
-    decoder: ax25ircd::ax25::kiss::KissDecoder,
+    decoder: rfircd::ax25::kiss::KissDecoder,
 }
 
 impl Rf {
@@ -107,7 +107,7 @@ impl Rf {
             seq: 1,
             _far: far,
             _rf_rx: rf_rx,
-            decoder: ax25ircd::ax25::kiss::KissDecoder::new(4096),
+            decoder: rfircd::ax25::kiss::KissDecoder::new(4096),
         }
     }
 
@@ -179,7 +179,7 @@ impl Rf {
             match tokio::time::timeout(Duration::from_millis(150), self._far.read(&mut buf)).await {
                 Ok(Ok(n)) if n > 0 => {
                     for kf in self.decoder.push(&buf[..n]) {
-                        if kf.command != ax25ircd::ax25::kiss::CMD_DATA {
+                        if kf.command != rfircd::ax25::kiss::CMD_DATA {
                             continue;
                         }
                         if let Ok(ax) = Ax25Frame::decode(&kf.payload) {
@@ -306,7 +306,7 @@ async fn an_allow_list_excludes_everyone_else() {
 #[tokio::test]
 async fn hello_registers_a_station() {
     let mut rf = Rf::new();
-    rf.heard("SM0ABC-7", Kind::Hello, &["ax25irc-station/1"]);
+    rf.heard("SM0ABC-7", Kind::Hello, &["rfirc-station/1"]);
     assert!(rf.station("SM0ABC-7").is_some());
     let u = rf
         .server
@@ -1039,13 +1039,13 @@ async fn held_mail_is_not_destroyed_when_the_transmit_queue_is_full() {
         rf.server.radio.transmit_direct(
             &"SK0AA-1".parse().unwrap(),
             AircFrame::new(Kind::Msg, 900 + i, vec![0x41; 120]),
-            ax25ircd::server::TxClass::Chat,
+            rfircd::server::TxClass::Chat,
         );
     }
     assert!(
         !rf.server
             .radio
-            .backlog_has_room(200, ax25ircd::server::TxClass::Direct),
+            .backlog_has_room(200, rfircd::server::TxClass::Direct),
         "test setup: the backlog should be full"
     );
 
@@ -1161,7 +1161,7 @@ async fn irc_keeps_the_full_topic_when_rf_truncates() {
 
 #[tokio::test]
 async fn a_server_notice_to_a_station_is_short_and_not_retried() {
-    use ax25ircd::airc::frame::flags;
+    use rfircd::airc::frame::flags;
     let mut rf = Rf::new();
     rf.heard("SM0ABC-7", Kind::Hello, &[]);
     let _ = rf.transmitted().await;
@@ -1546,5 +1546,156 @@ async fn a_forged_quit_is_rate_limited_like_every_other_control_frame() {
     assert!(
         rf.station("SM0ABC-7").is_some(),
         "a QUIT past the rate limit still removed the station"
+    );
+}
+
+#[tokio::test]
+async fn irc_channel_chat_reaches_an_aprs_peer_as_aprs() {
+    let mut rf = Rf::new();
+    let a = rf.client(1, "alice");
+    rf.send(a, "OPER root operpass1");
+    rf.send(a, "CALLSIGN SM0XYZ");
+    rf.send(a, "JOIN #rf");
+    rf.drain(a);
+    // APRS HT joins the channel by messaging the gateway.
+    rf.heard_aprs("SM0ABC-7", "APRS", b":SK0MT-1  :#rf listening{9");
+    let _ = rf.transmitted_raw().await;
+    rf.drain(a);
+
+    rf.send(a, "PRIVMSG #rf :hello trail");
+    let frames = rf.transmitted_raw().await;
+    let aprs: Vec<_> = frames
+        .iter()
+        .filter(|f| f.destination.call.to_string() == "APRS")
+        .collect();
+    assert!(
+        aprs.iter().any(|f| {
+            let s = String::from_utf8_lossy(&f.info);
+            s.contains("SM0ABC-7") && s.contains("alice: hello trail") && s.contains('{')
+        }),
+        "APRS peer must get addressed channel chat: {frames:?}"
+    );
+    assert!(
+        frames
+            .iter()
+            .filter(|f| AircFrame::decode(&f.info).is_ok())
+            .all(|f| {
+                AircFrame::decode(&f.info)
+                    .ok()
+                    .map(|a| a.kind != Kind::Msg)
+                    .unwrap_or(true)
+            }),
+        "no AIRC MSG when only an APRS peer is listening: {frames:?}"
+    );
+}
+
+#[tokio::test]
+async fn irc_private_message_to_aprs_peer_is_aprs() {
+    let mut rf = Rf::new();
+    let a = rf.client(1, "alice");
+    rf.send(a, "OPER root operpass1");
+    rf.send(a, "CALLSIGN SM0XYZ");
+    rf.send(a, "JOIN #rf");
+    rf.heard_aprs("SM0ABC-7", "APRS", b":SK0MT-1  :#rf hi{1");
+    let _ = rf.transmitted_raw().await;
+    rf.drain(a);
+
+    rf.send(a, "PRIVMSG SM0ABC|7 :direct reply");
+    let frames = rf.transmitted_raw().await;
+    assert!(
+        frames.iter().any(|f| {
+            f.destination.call.to_string() == "APRS"
+                && String::from_utf8_lossy(&f.info).contains("alice: direct reply")
+        }),
+        "DM to an APRS peer must be APRS: {frames:?}"
+    );
+}
+
+#[tokio::test]
+async fn aprs_ack_clears_outbound_pending() {
+    let mut rf = Rf::new();
+    let a = rf.client(1, "alice");
+    rf.send(a, "OPER root operpass1");
+    rf.send(a, "CALLSIGN SM0XYZ");
+    rf.send(a, "JOIN #rf");
+    rf.heard_aprs("SM0ABC-7", "APRS", b":SK0MT-1  :#rf hi{1");
+    let _ = rf.transmitted_raw().await;
+
+    rf.send(a, "PRIVMSG SM0ABC|7 :ping");
+    let frames = rf.transmitted_raw().await;
+    let msgid = frames
+        .iter()
+        .find_map(|f| {
+            let s = String::from_utf8_lossy(&f.info);
+            let i = s.rfind('{')?;
+            Some(s[i + 1..].trim_end_matches('}').to_string())
+        })
+        .expect("outbound APRS should carry a msgid");
+
+    // HT ACKs; a second DM should go out immediately (not blocked on retry).
+    let ack = format!(":SK0MT-1  :ack{msgid}");
+    rf.heard_aprs("SM0ABC-7", "APRS", ack.as_bytes());
+    rf.send(a, "PRIVMSG SM0ABC|7 :second");
+    let frames = rf.transmitted_raw().await;
+    assert!(
+        frames.iter().any(|f| {
+            String::from_utf8_lossy(&f.info).contains("alice: second")
+        }),
+        "after ACK the next DM should transmit: {frames:?}"
+    );
+}
+
+#[tokio::test]
+async fn aprs_nick_line_is_a_private_message() {
+    let mut rf = Rf::new();
+    let a = rf.client(1, "alice");
+    rf.send(a, "JOIN #rf");
+    rf.drain(a);
+
+    rf.heard_aprs("SM0ABC-7", "APRS", b":SK0MT-1  :alice hello from HT{3");
+    let lines = rf.drain(a);
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.contains("PRIVMSG alice :hello from HT")),
+        "nick-addressed APRS should be a query: {lines:?}"
+    );
+    assert!(
+        !lines.iter().any(|l| l.contains("PRIVMSG #rf")),
+        "must not also inject into the channel: {lines:?}"
+    );
+}
+
+#[tokio::test]
+async fn rf_mode_aprs_does_not_emit_airc_chat() {
+    let text = CONFIG.replace(
+        "presence_notices = true",
+        "presence_notices = true\nrf_mode = \"aprs\"",
+    );
+    let mut rf = Rf::with(&text);
+    let a = rf.client(1, "alice");
+    rf.send(a, "OPER root operpass1");
+    rf.send(a, "CALLSIGN SM0XYZ");
+    rf.send(a, "JOIN #rf");
+    rf.heard("SM0XYZ-9", Kind::Hello, &["SM0XYZ-9"]);
+    rf.heard("SM0XYZ-9", Kind::Join, &["#rf"]);
+    let _ = rf.transmitted_raw().await;
+    rf.drain(a);
+
+    rf.send(a, "PRIVMSG #rf :only aprs please");
+    let frames = rf.transmitted_raw().await;
+    assert!(
+        frames
+            .iter()
+            .filter(|f| AircFrame::decode(&f.info).is_ok())
+            .all(|f| AircFrame::decode(&f.info).unwrap().kind != Kind::Msg),
+        "rf_mode=aprs must not radiate AIRC chat: {frames:?}"
+    );
+    assert!(
+        frames.iter().any(|f| {
+            f.destination.call.to_string() == "APRS"
+                && String::from_utf8_lossy(&f.info).contains("only aprs please")
+        }),
+        "rf_mode=aprs fans out APRS to RF members: {frames:?}"
     );
 }

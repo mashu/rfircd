@@ -5,7 +5,7 @@ pub mod frame;
 pub mod session;
 
 pub use frame::{encode_fields, flags, AircFrame, Kind};
-pub use session::{Peer, SessionConfig, Sessions};
+pub use session::{Dialect, Peer, SessionConfig, Sessions};
 
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
 pub enum AircError {

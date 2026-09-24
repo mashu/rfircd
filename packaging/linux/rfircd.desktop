@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=ax25ircd
-Comment=IRC server with an AX.25 packet-radio gateway
-Exec=ax25ircd
-Icon=ax25ircd
+Name=rfircd
+Comment=IRC server with an RF gateway (KISS/Direwolf; AIRC and APRS)
+Exec=rfircd
+Icon=rfircd
 Terminal=true
 Categories=Network;HamRadio;
 Keywords=irc;ax25;packet;amateur;radio;

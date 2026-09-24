@@ -73,7 +73,7 @@ impl Audit {
             .map(|d| d.as_millis())
             .unwrap_or(0);
         let line = format_event(ts, kind, fields);
-        tracing::info!(target: "ax25ircd::audit", "{line}");
+        tracing::info!(target: "rfircd::audit", "{line}");
         let Some(tx) = self.tx.as_ref() else {
             return;
         };
@@ -228,7 +228,7 @@ mod tests {
     async fn the_audit_log_is_mode_600() {
         use std::os::unix::fs::PermissionsExt;
         let path = std::env::temp_dir().join(format!(
-            "ax25ircd-audit-mode-{}.log",
+            "rfircd-audit-mode-{}.log",
             std::time::SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
@@ -247,7 +247,7 @@ mod tests {
     #[tokio::test]
     async fn events_reach_the_file() {
         let path = std::env::temp_dir().join(format!(
-            "ax25ircd-audit-{}.log",
+            "rfircd-audit-{}.log",
             std::time::SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
